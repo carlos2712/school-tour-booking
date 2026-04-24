@@ -60,7 +60,7 @@ export default async function ConfirmPage({
           </div>
           <div>
             <p className="text-gray-400 text-sm mb-2">Performance(s)</p>
-            {booking.performances.map((perf, i) => (
+            {booking.performances.map((perf: any, i: number) => (
               <div key={i} className="mb-2">
                 <p className="text-white">
                   {format(new Date(perf.showDate.date), "EEEE, MMMM d, yyyy")} —{" "}

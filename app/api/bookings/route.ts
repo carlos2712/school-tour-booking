@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
       date: format(new Date(p.showDate.date), "EEEE, MMMM d, yyyy"),
       timeSlot: p.showDate.timeSlot,
       venueLocation: p.venueLocation,
-      customTime: p.customTime,
+      customTime: p.customTime ?? undefined,
     }));
 
     await Promise.allSettled([

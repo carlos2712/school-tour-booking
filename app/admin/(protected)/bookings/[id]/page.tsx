@@ -87,7 +87,7 @@ export default async function BookingDetailPage({
             Performance{booking.performances.length > 1 ? "s" : ""}
           </h2>
           <div className="space-y-4">
-            {booking.performances.map((perf, i) => (
+            {booking.performances.map((perf: any, i: number) => (
               <div key={i} className="border border-navy-light rounded-lg p-4">
                 <p className="text-foreground font-medium">
                   {format(new Date(perf.showDate.date), "EEEE, MMMM d, yyyy")} —{" "}
