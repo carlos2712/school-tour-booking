@@ -28,7 +28,7 @@ export default async function Home() {
               <div className="max-w-6xl mx-auto px-4 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center">
                 <div>
                   <p className="text-gold text-sm font-semibold tracking-widest uppercase mb-3">
-                    Now Booking
+                    Now Touring
                   </p>
                   <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight mb-6">
                     {show.title}
@@ -114,7 +114,7 @@ export default async function Home() {
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center py-32 text-center px-4">
             <h1 className="text-4xl font-bold text-foreground mb-4">
-              School Tours
+              School Tour
             </h1>
             <p className="text-gray-600 text-lg max-w-md">
               No performances are currently available for booking. Please check

@@ -58,7 +58,7 @@ export default async function AdminBookingsPage() {
                       {booking.contactName} · {booking.email}
                     </p>
                     <p className="text-gray-500 text-xs mt-1">
-                      {booking.show.title} · {booking.studentCount} students ·{" "}
+                      {booking.show.title} · {booking.performances.reduce((acc, p) => acc + p.studentCount, 0)} students ·{" "}
                       {booking.performanceCount} performance
                       {booking.performanceCount > 1 ? "s" : ""}
                     </p>

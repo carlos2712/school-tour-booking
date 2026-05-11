@@ -4,6 +4,7 @@ interface Performance {
   date: string;
   timeSlot: string;
   venueLocation: string;
+  studentCount: number;
   customTime?: string;
 }
 
@@ -51,7 +52,7 @@ export function BookingConfirmationEmail({
           American Stage
         </p>
         <p style={{ color: "#9ca3af", fontSize: "11px", letterSpacing: "2px", textTransform: "uppercase", marginTop: "4px" }}>
-          School Tours
+          School Tour
         </p>
       </div>
 
@@ -77,6 +78,7 @@ export function BookingConfirmationEmail({
                 {perf.customTime && ` (Requested: ${perf.customTime})`}
               </p>
               <p style={{ color: "#9ca3af", fontSize: "13px", margin: 0 }}>{perf.venueLocation}</p>
+              <p style={{ color: "#9ca3af", fontSize: "13px", margin: "2px 0 0 0" }}>Students: {perf.studentCount}</p>
             </div>
           ))}
         </div>

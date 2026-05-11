@@ -70,7 +70,6 @@ model Booking {
   email            String
   phone            String
   grades           String
-  studentCount     Int
   performanceCount Int                  @default(1)
   paymentOption    PaymentOption
   paymentAmount    Int?
@@ -100,6 +99,7 @@ model BookingPerformance {
   showDateId            String
   showDate              ShowDate  @relation(fields: [showDateId], references: [id])
   venueLocation         String
+  studentCount          Int       @default(0)
   preferredAlternateDate DateTime? @db.Date
   customTime            String?
 }

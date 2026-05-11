@@ -44,6 +44,7 @@ interface Performance {
   selectedDateStr: string;  // "yyyy-MM-dd" — the calendar selection
   showDateId: string;       // the actual slot id (set after AM/PM pick)
   venueLocation: string;
+  studentCount: string;
   preferredAlternateDate?: string;
   customTime?: string;
 }
@@ -54,10 +55,6 @@ const contactSchema = z.object({
   email: z.string().email("Valid email is required"),
   phone: z.string().min(10, "Valid phone number is required"),
   grades: z.string().min(1, "Grade(s) is required"),
-  studentCount: z.coerce
-    .number()
-    .min(1, "At least 1 student")
-    .max(200, "Maximum 200 students"),
 });
 type ContactFormData = z.infer<typeof contactSchema>;
 
@@ -75,7 +72,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
   const [contact, setContact] = useState<ContactFormData | null>(null);
   const [performanceCount, setPerformanceCount] = useState<1 | 2>(1);
   const [sameDay, setSameDay] = useState(false);
-  const [performances, setPerformances] = useState<(Performance | null)[]>([null]);
+  const [performances, setPerformances] = useState<Performance[]>([{ selectedDateStr: "", showDateId: "", venueLocation: "", studentCount: "" }]);
   const [paymentOption, setPaymentOption] = useState<"FREE" | "PAY_WHAT_YOU_CAN" | "FULL_FEE">("FREE");
   const [paymentAmount, setPaymentAmount] = useState("");
   const [customAnswers, setCustomAnswers] = useState<Record<string, string | string[]>>({});
@@ -112,6 +109,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
     setPerformances((prev) => {
       const updated = [...prev];
       const venue = updated[perfIndex]?.venueLocation ?? "";
+      const students = updated[perfIndex]?.studentCount ?? "";
       
       if (sameDay) {
         const amSlot = slots.find(s => s.timeSlot === "AM");
@@ -119,6 +117,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
           selectedDateStr: dateStr,
           showDateId: amSlot ? amSlot.id : "",
           venueLocation: venue,
+          studentCount: students,
           customTime: updated[perfIndex]?.customTime,
         };
       } else {
@@ -126,6 +125,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
           selectedDateStr: dateStr,
           showDateId: slots.length === 1 ? slots[0].id : "",
           venueLocation: venue,
+          studentCount: students,
           customTime: updated[perfIndex]?.customTime,
         };
       }
@@ -155,8 +155,8 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
     setPerformanceCount(count);
     setPerformances(
       count === 1
-        ? [performances[0] ?? null]
-        : [performances[0] ?? null, performances[1] ?? null]
+        ? [performances[0] ?? { selectedDateStr: "", showDateId: "", venueLocation: "", studentCount: "" }]
+        : [performances[0] ?? { selectedDateStr: "", showDateId: "", venueLocation: "", studentCount: "" }, performances[1] ?? { selectedDateStr: "", showDateId: "", venueLocation: "", studentCount: "" }]
     );
   }
 
@@ -178,6 +178,8 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
        if (!p.selectedDateStr) return false;
        if (!sameDay && !p.showDateId) return false;
        if (p.venueLocation.trim().length === 0) return false;
+       const studentCountNum = parseInt(p.studentCount, 10);
+       if (isNaN(studentCountNum) || studentCountNum < 1 || studentCountNum > 200) return false;
        
        const slot = sameDay ? getSlotsForDate(p.selectedDateStr).find(s => s.timeSlot === "AM") : availableDates.find((d) => d.id === p.showDateId);
        if (slot?.timeSlot === "AM" || sameDay) {
@@ -206,18 +208,21 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                     performances: sameDay
             ? [
                 {
-                  showDateId: getSlotsForDate(performances[0]!.selectedDateStr).find(s => s.timeSlot === "AM")?.id ?? "",
+                    showDateId: getSlotsForDate(performances[0]!.selectedDateStr).find(s => s.timeSlot === "AM")?.id ?? "",
                   venueLocation: performances[0]!.venueLocation,
+                  studentCount: parseInt(performances[0]!.studentCount, 10) || 1,
                   customTime: performances[0]!.customTime,
                 },
                 {
                   showDateId: getSlotsForDate(performances[0]!.selectedDateStr).find(s => s.timeSlot === "PM")?.id ?? "",
                   venueLocation: performances[0]!.venueLocation,
+                  studentCount: parseInt(performances[0]!.studentCount, 10) || 1,
                 }
               ]
             : performances.slice(0, performanceCount).map((p) => ({
                 showDateId: p!.showDateId,
                 venueLocation: p!.venueLocation,
+                studentCount: parseInt(p!.studentCount, 10) || 1,
                 preferredAlternateDate: p!.preferredAlternateDate,
                 customTime: p!.customTime,
               })),
@@ -315,19 +320,6 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
               />
               {errors.grades && (
                 <p className="text-red-400 text-xs">{errors.grades.message}</p>
-              )}
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="studentCount">Number of Students * (max 200)</Label>
-              <Input
-                id="studentCount"
-                type="number"
-                min={1}
-                max={200}
-                {...register("studentCount")}
-              />
-              {errors.studentCount && (
-                <p className="text-red-400 text-xs">{errors.studentCount.message}</p>
               )}
             </div>
           </div>
@@ -506,19 +498,41 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                 )}
 
 
-                {selectedDateStr && slots.length === 0 && (
-                  <p className="text-sm text-amber-400">
-                    No open slots for this date. Please pick another.
-                  </p>
-                )}
-
-                <div className="space-y-1.5">
-                  <Label>School / Venue Location *</Label>
-                  <Input
-                    placeholder="e.g. Suncoast Elementary School"
-                    value={performances[perfIndex]?.venueLocation ?? ""}
-                    onChange={(e) => handleVenueChange(perfIndex, e.target.value)}
-                  />
+                <div className="grid sm:grid-cols-2 gap-5 mt-4">
+                  <div className="space-y-1.5">
+                    <Label>
+                      School / Venue Location *
+                      <span className="block text-xs text-gray-500 font-normal mt-0.5">
+                        (Where the show will take place - e.g. cafeteria, auditorium)
+                      </span>
+                    </Label>
+                    <Input
+                      placeholder="e.g. Suncoast Elementary School"
+                      value={performances[perfIndex]?.venueLocation ?? ""}
+                      onChange={(e) => handleVenueChange(perfIndex, e.target.value)}
+                    />
+                  </div>
+                  
+                  <div className="space-y-1.5">
+                    <Label>Number of Students *</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={200}
+                      placeholder="e.g. 150"
+                      value={performances[perfIndex]?.studentCount ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setPerformances((prev) => {
+                          const updated = [...prev];
+                          if (updated[perfIndex]) {
+                            updated[perfIndex] = { ...updated[perfIndex]!, studentCount: val };
+                          }
+                          return updated;
+                        });
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             );
@@ -731,10 +745,6 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                   <dt className="text-gray-500">Grades</dt>
                   <dd>{contact.grades}</dd>
                 </div>
-                <div>
-                  <dt className="text-gray-500">Students</dt>
-                  <dd>{contact.studentCount}</dd>
-                </div>
               </dl>
             </div>
 
@@ -750,6 +760,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                   )}
                   <p className="text-gray-600">AM Time: {performances[0]?.customTime}</p>
                   <p className="text-gray-600">Venue: {performances[0]?.venueLocation}</p>
+                  <p className="text-gray-600">Students: {performances[0]?.studentCount}</p>
                 </div>
               ) : performances.slice(0, performanceCount).map((p, i) => {
                 const slot = availableDates.find((d) => d.id === p?.showDateId);
@@ -763,6 +774,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                       </p>
                     )}
                     <p className="text-gray-600">Venue: {p?.venueLocation}</p>
+                    <p className="text-gray-600">Students: {p?.studentCount}</p>
                   </div>
                 );
               })}

@@ -77,7 +77,6 @@ export default async function BookingDetailPage({
             <Field label="Email" value={<a href={`mailto:${booking.email}`} className="text-gold hover:underline">{booking.email}</a>} />
             <Field label="Phone" value={<a href={`tel:${booking.phone}`} className="text-gold hover:underline">{booking.phone}</a>} />
             <Field label="Grades" value={booking.grades} />
-            <Field label="Students" value={String(booking.studentCount)} />
           </dl>
         </section>
 
@@ -95,6 +94,7 @@ export default async function BookingDetailPage({
                   {perf.customTime && <span className="text-gray-600 text-sm ml-2">(Requested: {perf.customTime})</span>}
                 </p>
                 <p className="text-gray-600 text-sm mt-1">{perf.venueLocation}</p>
+                <p className="text-gray-600 text-sm mt-1">Students: {perf.studentCount}</p>
                 {perf.preferredAlternateDate && (
                   <p className="text-gray-500 text-xs mt-1">
                     Preferred alternate: {format(new Date(perf.preferredAlternateDate), "MMM d, yyyy")}

@@ -4,6 +4,7 @@ interface Performance {
   date: string;
   timeSlot: string;
   venueLocation: string;
+  studentCount: number;
   customTime?: string;
 }
 
@@ -15,7 +16,6 @@ interface AdminNotificationEmailProps {
     email: string;
     phone: string;
     grades: string;
-    studentCount: number;
     paymentOption: string;
     paymentAmount?: number;
     notes?: string;
@@ -49,7 +49,6 @@ export function AdminNotificationEmail({
             ["Email", booking.email],
             ["Phone", booking.phone],
             ["Grades", booking.grades],
-            ["Students", String(booking.studentCount)],
             ["Payment", paymentLabel],
           ].map(([label, value]) => (
             <tr key={label} style={{ borderBottom: "1px solid #e5e7eb" }}>
@@ -68,6 +67,7 @@ export function AdminNotificationEmail({
             {perf.customTime && ` (Requested: ${perf.customTime})`}
           </p>
           <p style={{ margin: 0, color: "#6b7280", fontSize: "13px" }}>{perf.venueLocation}</p>
+          <p style={{ margin: "4px 0 0 0", color: "#6b7280", fontSize: "13px" }}>Students: {perf.studentCount}</p>
         </div>
       ))}
 

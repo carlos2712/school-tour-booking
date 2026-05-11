@@ -69,6 +69,7 @@ export default async function ConfirmPage({
                   </span>
                 </p>
                 <p className="text-gray-400 text-sm">{perf.venueLocation}</p>
+                <p className="text-gray-400 text-sm">Students: {perf.studentCount}</p>
               </div>
             ))}
           </div>
@@ -80,10 +81,6 @@ export default async function ConfirmPage({
             <div>
               <p className="text-gray-400">Contact</p>
               <p className="text-white">{booking.contactName}</p>
-            </div>
-            <div>
-              <p className="text-gray-400">Students</p>
-              <p className="text-white">{booking.studentCount}</p>
             </div>
             <div>
               <p className="text-gray-400">Booking ID</p>
@@ -107,7 +104,7 @@ export default async function ConfirmPage({
           href="/"
           className="inline-flex items-center gap-2 px-6 py-3 border border-gold text-gold rounded-md hover:bg-gold/10 transition-colors text-sm"
         >
-          ← Back to School Tours
+          ← Back to School Tour
         </Link>
       </main>
     </div>

@@ -10,6 +10,7 @@ import { format } from "date-fns";
 const performanceSchema = z.object({
   showDateId: z.string().min(1),
   venueLocation: z.string().min(1),
+  studentCount: z.number().min(1).max(200),
   preferredAlternateDate: z.string().optional(),
   customTime: z.string().optional(),
 });
@@ -21,7 +22,6 @@ const bookingSchema = z.object({
   email: z.string().email(),
   phone: z.string().min(1),
   grades: z.string().min(1),
-  studentCount: z.number().min(1).max(200),
   performanceCount: z.number().min(1).max(2),
   paymentOption: z.enum(["FREE", "PAY_WHAT_YOU_CAN", "FULL_FEE"]),
   paymentAmount: z.number().optional(),
@@ -62,7 +62,6 @@ export async function POST(req: NextRequest) {
           email: data.email,
           phone: data.phone,
           grades: data.grades,
-          studentCount: data.studentCount,
           performanceCount: data.performanceCount,
           paymentOption: data.paymentOption,
           paymentAmount: data.paymentAmount,
@@ -73,6 +72,7 @@ export async function POST(req: NextRequest) {
             create: data.performances.map((p) => ({
               showDateId: p.showDateId,
               venueLocation: p.venueLocation,
+              studentCount: p.studentCount,
               preferredAlternateDate: p.preferredAlternateDate
                 ? new Date(p.preferredAlternateDate)
                 : null,
@@ -103,6 +103,7 @@ export async function POST(req: NextRequest) {
       date: format(new Date(p.showDate.date), "EEEE, MMMM d, yyyy"),
       timeSlot: p.showDate.timeSlot,
       venueLocation: p.venueLocation,
+      studentCount: p.studentCount,
       customTime: p.customTime ?? undefined,
     }));
 
@@ -134,7 +135,6 @@ export async function POST(req: NextRequest) {
             email: booking.email,
             phone: booking.phone,
             grades: booking.grades,
-            studentCount: booking.studentCount,
             paymentOption: booking.paymentOption,
             paymentAmount: booking.paymentAmount ?? undefined,
             notes: booking.notes ?? undefined,

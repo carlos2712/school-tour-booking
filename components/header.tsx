@@ -9,7 +9,7 @@ export function Header() {
             American Stage
           </span>
           <span className="text-gray-600 text-xs tracking-widest uppercase">
-            School Tours
+            School Tour
           </span>
         </Link>
         <nav className="flex items-center gap-6 text-sm">
