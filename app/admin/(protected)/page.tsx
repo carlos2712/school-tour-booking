@@ -23,8 +23,8 @@ export default async function AdminDashboard() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold text-white mb-1">Dashboard</h1>
-      <p className="text-gray-400 text-sm mb-8">Welcome to the School Tours admin panel.</p>
+      <h1 className="text-2xl font-bold text-foreground mb-1">Dashboard</h1>
+      <p className="text-gray-500 text-sm mb-8">Welcome to the School Tours admin panel.</p>
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
@@ -35,12 +35,12 @@ export default async function AdminDashboard() {
 
       {/* Active show */}
       <div className="mb-10">
-        <h2 className="text-lg font-semibold text-white mb-3">Active Show</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-3">Active Show</h2>
         {show ? (
-          <div className="bg-navy-card border border-navy-light rounded-lg p-5 flex items-center justify-between">
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-5 flex items-center justify-between">
             <div>
-              <p className="text-white font-medium">{show.title}</p>
-              <p className="text-gray-400 text-sm mt-0.5">
+              <p className="text-foreground font-medium">{show.title}</p>
+              <p className="text-gray-500 text-sm mt-0.5">
                 {show.description.slice(0, 100)}
                 {show.description.length > 100 ? "…" : ""}
               </p>
@@ -53,8 +53,8 @@ export default async function AdminDashboard() {
             </Link>
           </div>
         ) : (
-          <div className="bg-navy-card border border-navy-light rounded-lg p-5">
-            <p className="text-gray-400 text-sm">No active show.</p>
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-5">
+            <p className="text-gray-500 text-sm">No active show.</p>
             <Link href="/admin/show" className="text-gold text-sm hover:underline mt-1 inline-block">
               Create a show →
             </Link>
@@ -64,7 +64,7 @@ export default async function AdminDashboard() {
 
       {/* Quick links */}
       <div>
-        <h2 className="text-lg font-semibold text-white mb-3">Quick Actions</h2>
+        <h2 className="text-lg font-semibold text-foreground mb-3">Quick Actions</h2>
         <div className="grid sm:grid-cols-3 gap-4">
           <QuickLink href="/admin/show" label="Edit Show Details" desc="Update title, description, images, pricing" />
           <QuickLink href="/admin/dates" label="Manage Dates" desc="Add or remove available performance slots" />
@@ -77,9 +77,9 @@ export default async function AdminDashboard() {
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
-    <div className="bg-navy-card border border-navy-light rounded-lg p-5">
-      <p className="text-gray-400 text-sm">{label}</p>
-      <p className="text-3xl font-bold text-white mt-1">{value}</p>
+    <div className="bg-gray-50 border border-gray-200 rounded-lg p-5">
+      <p className="text-gray-500 text-sm">{label}</p>
+      <p className="text-3xl font-bold text-foreground mt-1">{value}</p>
     </div>
   );
 }
@@ -88,10 +88,10 @@ function QuickLink({ href, label, desc }: { href: string; label: string; desc: s
   return (
     <Link
       href={href}
-      className="bg-navy-card border border-navy-light rounded-lg p-5 hover:border-gold/50 transition-colors block"
+      className="bg-gray-50 border border-gray-200 rounded-lg p-5 hover:border-gold/50 transition-colors block"
     >
-      <p className="text-white font-medium mb-1">{label}</p>
-      <p className="text-gray-400 text-sm">{desc}</p>
+      <p className="text-foreground font-medium mb-1">{label}</p>
+      <p className="text-gray-500 text-sm">{desc}</p>
     </Link>
   );
 }

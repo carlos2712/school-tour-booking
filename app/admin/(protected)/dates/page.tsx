@@ -14,8 +14,8 @@ export default async function AdminDatesPage() {
   if (!show) {
     return (
       <div className="p-8">
-        <h1 className="text-2xl font-bold text-white mb-4">Manage Dates</h1>
-        <p className="text-gray-400">
+        <h1 className="text-2xl font-bold text-foreground mb-4">Manage Dates</h1>
+        <p className="text-gray-500">
           No active show. Please create a show first in{" "}
           <a href="/admin/show" className="text-gold hover:underline">
             Show Setup
@@ -28,9 +28,9 @@ export default async function AdminDatesPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold text-white mb-1">Manage Dates</h1>
-      <p className="text-gray-400 text-sm mb-8">
-        Add AM/PM time slots for <span className="text-white">{show.title}</span>.
+      <h1 className="text-2xl font-bold text-foreground mb-1">Manage Dates</h1>
+      <p className="text-gray-500 text-sm mb-8">
+        Add AM/PM time slots for <span className="text-foreground">{show.title}</span>.
         Click a date to add or remove slots.
       </p>
       <DateManager

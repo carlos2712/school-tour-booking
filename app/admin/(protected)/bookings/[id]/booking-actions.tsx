@@ -33,7 +33,7 @@ export function BookingActions({ bookingId, currentStatus, performances }: Props
   }
 
   return (
-    <section className="bg-navy-card border border-navy-light rounded-xl p-6">
+    <section className="bg-gray-50 border border-gray-200 rounded-xl p-6">
       <h2 className="text-gold font-semibold mb-4">Admin Actions</h2>
 
       {error && <p className="text-red-400 text-sm mb-3">{error}</p>}

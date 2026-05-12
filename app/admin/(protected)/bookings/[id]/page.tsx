@@ -39,11 +39,11 @@ export default async function BookingDetailPage({
   return (
     <div className="p-8 max-w-3xl">
       <div className="flex items-center gap-3 mb-6">
-        <Link href="/admin/bookings" className="text-gray-400 hover:text-gold text-sm">
+        <Link href="/admin/bookings" className="text-gray-500 hover:text-gold text-sm">
           ← Bookings
         </Link>
         <span className="text-gray-600">/</span>
-        <span className="text-gray-300 text-sm truncate">{booking.schoolName}</span>
+        <span className="text-gray-600 text-sm truncate">{booking.schoolName}</span>
       </div>
 
       <div className="flex items-start justify-between gap-4 mb-8">
@@ -69,7 +69,7 @@ export default async function BookingDetailPage({
 
       <div className="space-y-5">
         {/* Contact */}
-        <section className="bg-navy-card border border-navy-light rounded-xl p-6">
+        <section className="bg-gray-50 border border-gray-200 rounded-xl p-6">
           <h2 className="text-gold font-semibold mb-4">Contact Information</h2>
           <dl className="grid sm:grid-cols-2 gap-4 text-sm">
             <Field label="School" value={booking.schoolName} />
@@ -81,13 +81,13 @@ export default async function BookingDetailPage({
         </section>
 
         {/* Performances */}
-        <section className="bg-navy-card border border-navy-light rounded-xl p-6">
+        <section className="bg-gray-50 border border-gray-200 rounded-xl p-6">
           <h2 className="text-gold font-semibold mb-4">
             Performance{booking.performances.length > 1 ? "s" : ""}
           </h2>
           <div className="space-y-4">
             {booking.performances.map((perf: any, i: number) => (
-              <div key={i} className="border border-navy-light rounded-lg p-4">
+              <div key={i} className="border border-gray-200 rounded-lg p-4">
                 <p className="text-foreground font-medium">
                   {format(new Date(perf.showDate.date), "EEEE, MMMM d, yyyy")} —{" "}
                   <span className="text-gold">{perf.showDate.timeSlot}</span>
@@ -106,20 +106,20 @@ export default async function BookingDetailPage({
         </section>
 
         {/* Payment */}
-        <section className="bg-navy-card border border-navy-light rounded-xl p-6">
+        <section className="bg-gray-50 border border-gray-200 rounded-xl p-6">
           <h2 className="text-gold font-semibold mb-3">Payment</h2>
-          <p className="text-white text-sm">{paymentLabel}</p>
+          <p className="text-foreground text-sm">{paymentLabel}</p>
         </section>
 
         {/* Custom answers */}
         {Object.keys(customAnswers).length > 0 && (
-          <section className="bg-navy-card border border-navy-light rounded-xl p-6">
+          <section className="bg-gray-50 border border-gray-200 rounded-xl p-6">
             <h2 className="text-gold font-semibold mb-4">Additional Information</h2>
             <dl className="space-y-3 text-sm">
               {Object.entries(customAnswers).map(([key, value]) => (
                 <div key={key}>
-                  <dt className="text-gray-400">{key}</dt>
-                  <dd className="text-white">
+                  <dt className="text-gray-500">{key}</dt>
+                  <dd className="text-foreground">
                     {Array.isArray(value) ? value.join(", ") : String(value)}
                   </dd>
                 </div>
@@ -130,9 +130,9 @@ export default async function BookingDetailPage({
 
         {/* Notes */}
         {booking.notes && (
-          <section className="bg-navy-card border border-navy-light rounded-xl p-6">
+          <section className="bg-gray-50 border border-gray-200 rounded-xl p-6">
             <h2 className="text-gold font-semibold mb-3">Notes</h2>
-            <p className="text-gray-300 text-sm whitespace-pre-wrap">{booking.notes}</p>
+            <p className="text-gray-600 text-sm whitespace-pre-wrap">{booking.notes}</p>
           </section>
         )}
 

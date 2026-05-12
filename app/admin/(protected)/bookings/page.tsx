@@ -19,8 +19,8 @@ export default async function AdminBookingsPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold text-white mb-1">Bookings</h1>
-      <p className="text-gray-400 text-sm mb-8">
+      <h1 className="text-2xl font-bold text-foreground mb-1">Bookings</h1>
+      <p className="text-gray-500 text-sm mb-8">
         {bookings.length} total booking{bookings.length !== 1 ? "s" : ""}
       </p>
 
@@ -34,12 +34,12 @@ export default async function AdminBookingsPage() {
               <Link
                 key={booking.id}
                 href={`/admin/bookings/${booking.id}`}
-                className="block bg-navy-card border border-navy-light rounded-lg p-5 hover:border-gold/50 transition-colors"
+                className="block bg-gray-50 border border-gray-200 rounded-lg p-5 hover:border-gold/50 transition-colors"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-1">
-                      <p className="text-white font-semibold truncate">
+                      <p className="text-foreground font-semibold truncate">
                         {booking.schoolName}
                       </p>
                       <Badge
@@ -54,7 +54,7 @@ export default async function AdminBookingsPage() {
                         {booking.status}
                       </Badge>
                     </div>
-                    <p className="text-gray-400 text-sm">
+                    <p className="text-gray-500 text-sm">
                       {booking.contactName} · {booking.email}
                     </p>
                     <p className="text-gray-500 text-xs mt-1">
@@ -65,7 +65,7 @@ export default async function AdminBookingsPage() {
                   </div>
                   <div className="text-right shrink-0">
                     {firstPerf && (
-                      <p className="text-white text-sm">
+                      <p className="text-foreground text-sm">
                         {format(new Date(firstPerf.showDate.date), "MMM d, yyyy")}
                       </p>
                     )}

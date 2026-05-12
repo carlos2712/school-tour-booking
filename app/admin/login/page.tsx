@@ -12,30 +12,30 @@ export default async function LoginPage({
   const { verify } = await searchParams;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-navy px-4">
+    <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <p className="text-gold font-bold text-xl tracking-wide uppercase">
             American Stage
           </p>
-          <p className="text-gray-400 text-sm tracking-widest uppercase mt-1">
+          <p className="text-gray-500 text-sm tracking-widest uppercase mt-1">
             Admin Portal
           </p>
         </div>
 
-        <div className="bg-navy-card border border-navy-light rounded-xl p-8">
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-8">
           {verify ? (
             <div className="text-center">
               <div className="text-4xl mb-4">📧</div>
-              <h1 className="text-white font-bold text-xl mb-2">Check your email</h1>
-              <p className="text-gray-400 text-sm">
+              <h1 className="text-foreground font-bold text-xl mb-2">Check your email</h1>
+              <p className="text-gray-500 text-sm">
                 We sent you a magic link. Click it to sign in to the admin panel.
               </p>
             </div>
           ) : (
             <>
-              <h1 className="text-white font-bold text-xl mb-1">Sign in</h1>
-              <p className="text-gray-400 text-sm mb-6">
+              <h1 className="text-foreground font-bold text-xl mb-1">Sign in</h1>
+              <p className="text-gray-500 text-sm mb-6">
                 Enter your admin email to receive a sign-in link.
               </p>
               <form
@@ -48,7 +48,7 @@ export default async function LoginPage({
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-gray-200 mb-1.5"
+                    className="block text-sm font-medium text-gray-700 mb-1.5"
                   >
                     Email address
                   </label>
@@ -58,7 +58,7 @@ export default async function LoginPage({
                     type="email"
                     required
                     placeholder="admin@americanstage.org"
-                    className="w-full h-10 px-3 rounded-md border border-navy-light bg-navy text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gold text-sm"
+                    className="w-full h-10 px-3 rounded-md border border-gray-200 bg-white text-foreground placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gold text-sm"
                   />
                 </div>
                 <button

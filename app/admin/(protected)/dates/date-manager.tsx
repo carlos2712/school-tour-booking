@@ -105,8 +105,8 @@ export function DateManager({ showId, existingDates }: Props) {
     <div className="grid lg:grid-cols-2 gap-8">
       {/* Calendar */}
       <div>
-        <div className="bg-navy-card border border-navy-light rounded-xl p-6">
-          <h2 className="text-white font-semibold mb-4">Select a Date</h2>
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
+          <h2 className="text-foreground font-semibold mb-4">Select a Date</h2>
           <DayPicker
             mode="single"
             selected={selectedDay}
@@ -126,7 +126,7 @@ export function DateManager({ showId, existingDates }: Props) {
           />
 
           {/* Legend */}
-          <div className="flex gap-4 mt-4 text-xs text-gray-400">
+          <div className="flex gap-4 mt-4 text-xs text-gray-500">
             <span className="flex items-center gap-1">
               <span className="w-3 h-3 rounded-full bg-emerald-600 inline-block" />
               Available
@@ -140,8 +140,8 @@ export function DateManager({ showId, existingDates }: Props) {
 
         {/* Add slots panel */}
         {selectedDay && (
-          <div className="mt-4 bg-navy-card border border-navy-light rounded-xl p-5 space-y-4">
-            <h3 className="text-white font-semibold">
+          <div className="mt-4 bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-4">
+            <h3 className="text-foreground font-semibold">
               {format(selectedDay, "EEEE, MMMM d, yyyy")}
             </h3>
 
@@ -171,7 +171,7 @@ export function DateManager({ showId, existingDates }: Props) {
                 {selectedSlots.map((slot) => (
                   <div
                     key={slot.id}
-                    className="flex items-center gap-3 p-3 bg-navy rounded-md"
+                    className="flex items-center gap-3 p-3 bg-white rounded-md"
                   >
                     <Badge
                       variant={
@@ -184,7 +184,7 @@ export function DateManager({ showId, existingDates }: Props) {
                     >
                       {slot.timeSlot}
                     </Badge>
-                    <span className="text-sm text-gray-300 flex-1">
+                    <span className="text-sm text-gray-600 flex-1">
                       {slot.isBooked
                         ? "Booked"
                         : slot.isAvailable
@@ -221,7 +221,7 @@ export function DateManager({ showId, existingDates }: Props) {
 
       {/* All dates list */}
       <div>
-        <h2 className="text-white font-semibold mb-4">All Configured Dates</h2>
+        <h2 className="text-foreground font-semibold mb-4">All Configured Dates</h2>
         {allDates.length === 0 ? (
           <p className="text-gray-500 text-sm">No dates configured yet. Click a date on the calendar to add slots.</p>
         ) : (
@@ -229,9 +229,9 @@ export function DateManager({ showId, existingDates }: Props) {
             {allDates.map(({ dateStr, slots }) => (
               <div
                 key={dateStr}
-                className="bg-navy-card border border-navy-light rounded-lg p-4"
+                className="bg-gray-50 border border-gray-200 rounded-lg p-4"
               >
-                <p className="text-white text-sm font-medium mb-2">
+                <p className="text-foreground text-sm font-medium mb-2">
                   {format(parseISO(dateStr), "EEEE, MMMM d, yyyy")}
                 </p>
                 <div className="flex gap-2 flex-wrap">

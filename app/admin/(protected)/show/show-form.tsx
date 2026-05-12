@@ -112,7 +112,7 @@ export function ShowForm({ show }: Props) {
     <div className="space-y-8">
       {/* Basic info */}
       <section className="space-y-5">
-        <h2 className="text-lg font-semibold text-white border-b border-navy-light pb-2">
+        <h2 className="text-lg font-semibold text-foreground border-b border-gray-200 pb-2">
           Basic Information
         </h2>
         <div className="space-y-1.5">
@@ -132,10 +132,10 @@ export function ShowForm({ show }: Props) {
 
       {/* Images */}
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-white border-b border-navy-light pb-2">
+        <h2 className="text-lg font-semibold text-foreground border-b border-gray-200 pb-2">
           Show Images
         </h2>
-        <p className="text-gray-400 text-sm">Add image URLs (from Vercel Blob or any public URL).</p>
+        <p className="text-gray-500 text-sm">Add image URLs (from Vercel Blob or any public URL).</p>
         <div className="flex gap-2">
           <Input
             value={imageUrl}
@@ -150,8 +150,8 @@ export function ShowForm({ show }: Props) {
         {images.length > 0 && (
           <div className="space-y-2">
             {images.map((url, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm bg-navy-light rounded-md px-3 py-2">
-                <span className="flex-1 truncate text-gray-300">{url}</span>
+              <div key={i} className="flex items-center gap-2 text-sm bg-gray-100 rounded-md px-3 py-2">
+                <span className="flex-1 truncate text-gray-600">{url}</span>
                 {i === 0 && (
                   <span className="text-xs text-gold bg-gold/10 px-2 py-0.5 rounded-full">Hero</span>
                 )}
@@ -166,7 +166,7 @@ export function ShowForm({ show }: Props) {
 
       {/* Pricing */}
       <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-white border-b border-navy-light pb-2">
+        <h2 className="text-lg font-semibold text-foreground border-b border-gray-200 pb-2">
           Pricing Options
         </h2>
         <div className="space-y-3">
@@ -177,7 +177,7 @@ export function ShowForm({ show }: Props) {
               onChange={(e) => setEnableFree(e.target.checked)}
               className="accent-gold w-4 h-4"
             />
-            <span className="text-white text-sm">Enable Free Performance option</span>
+            <span className="text-foreground text-sm">Enable Free Performance option</span>
           </label>
           <label className="flex items-center gap-3 cursor-pointer">
             <input
@@ -186,7 +186,7 @@ export function ShowForm({ show }: Props) {
               onChange={(e) => setEnablePwyw(e.target.checked)}
               className="accent-gold w-4 h-4"
             />
-            <span className="text-white text-sm">Enable Pay What You Can option</span>
+            <span className="text-foreground text-sm">Enable Pay What You Can option</span>
           </label>
           <label className="flex items-center gap-3 cursor-pointer">
             <input
@@ -195,7 +195,7 @@ export function ShowForm({ show }: Props) {
               onChange={(e) => setEnableFullFee(e.target.checked)}
               className="accent-gold w-4 h-4"
             />
-            <span className="text-white text-sm">Enable Full Fee option</span>
+            <span className="text-foreground text-sm">Enable Full Fee option</span>
           </label>
         </div>
         {enableFullFee && (
@@ -213,8 +213,8 @@ export function ShowForm({ show }: Props) {
 
       {/* Custom Questions */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between border-b border-navy-light pb-2">
-          <h2 className="text-lg font-semibold text-white">Custom Questions</h2>
+        <div className="flex items-center justify-between border-b border-gray-200 pb-2">
+          <h2 className="text-lg font-semibold text-foreground">Custom Questions</h2>
           <Button type="button" onClick={addQuestion} size="sm" variant="outline">
             <Plus className="h-4 w-4 mr-1" /> Add Question
           </Button>
@@ -226,10 +226,10 @@ export function ShowForm({ show }: Props) {
 
         <div className="space-y-4">
           {questions.map((q, idx) => (
-            <div key={q.id} className="border border-navy-light rounded-lg p-4 space-y-3">
+            <div key={q.id} className="border border-gray-200 rounded-lg p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <GripVertical className="h-4 w-4 text-gray-500" />
-                <span className="text-xs text-gray-400">Question {idx + 1}</span>
+                <span className="text-xs text-gray-500">Question {idx + 1}</span>
                 <div className="flex-1" />
                 <button type="button" onClick={() => removeQuestion(q.id)} className="text-gray-500 hover:text-red-400">
                   <Trash2 className="h-4 w-4" />
@@ -251,7 +251,7 @@ export function ShowForm({ show }: Props) {
                   <select
                     value={q.type}
                     onChange={(e) => updateQuestion(q.id, { type: e.target.value as QuestionType })}
-                    className="h-10 px-3 rounded-md border border-navy-light bg-navy-light text-white text-sm focus:outline-none focus:ring-2 focus:ring-gold"
+                    className="h-10 px-3 rounded-md border border-gray-200 bg-gray-100 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-gold"
                   >
                     <option value="TEXT">Text</option>
                     <option value="RADIO">Radio (single select)</option>
@@ -266,7 +266,7 @@ export function ShowForm({ show }: Props) {
                     onChange={(e) => updateQuestion(q.id, { isRequired: e.target.checked })}
                     className="accent-gold w-4 h-4"
                   />
-                  <span className="text-white text-sm">Required</span>
+                  <span className="text-foreground text-sm">Required</span>
                 </label>
               </div>
 

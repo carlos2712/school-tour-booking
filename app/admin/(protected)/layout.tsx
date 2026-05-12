@@ -13,12 +13,12 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen flex">
       {/* Sidebar */}
-      <aside className="w-56 bg-navy-card border-r border-navy-light flex flex-col fixed inset-y-0 left-0">
-        <div className="p-5 border-b border-navy-light">
+      <aside className="w-56 bg-gray-50 border-r border-gray-200 flex flex-col fixed inset-y-0 left-0">
+        <div className="p-5 border-b border-gray-200">
           <p className="text-gold font-bold text-sm tracking-wide uppercase">
             American Stage
           </p>
-          <p className="text-gray-400 text-xs tracking-widest uppercase mt-0.5">
+          <p className="text-gray-500 text-xs tracking-widest uppercase mt-0.5">
             Admin
           </p>
         </div>
@@ -30,7 +30,7 @@ export default async function AdminLayout({
           <NavLink href="/admin/dates">Manage Dates</NavLink>
           <NavLink href="/admin/bookings">Bookings</NavLink>
         </nav>
-        <div className="p-4 border-t border-navy-light">
+        <div className="p-4 border-t border-gray-200">
           <p className="text-gray-500 text-xs mb-2 truncate">{session.user?.email}</p>
           <form
             action={async () => {
@@ -40,7 +40,7 @@ export default async function AdminLayout({
           >
             <button
               type="submit"
-              className="text-xs text-gray-400 hover:text-red-400 transition-colors"
+              className="text-xs text-gray-500 hover:text-red-400 transition-colors"
             >
               Sign out
             </button>
@@ -68,7 +68,7 @@ function NavLink({
   return (
     <Link
       href={href}
-      className="flex items-center px-3 py-2 rounded-md text-sm text-gray-300 hover:bg-navy-light hover:text-white transition-colors"
+      className="flex items-center px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-gray-100 hover:text-foreground transition-colors"
     >
       {children}
     </Link>
