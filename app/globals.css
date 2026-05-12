@@ -1,18 +1,39 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #111827;
-  --navy: #0a1628;
-  --navy-light: #e5e7eb;
-  --navy-card: #f9fafb;
-  --gold: #c9a84c;
-  --gold-light: #e8c87a;
+  --background: #fff8e6;
+  --foreground: #56398d;
+  
+  /* New Palette */
+  --primary-purple: #92278f;
+  --secondary-gold: #efaf23;
+  --accent-blue: #27aae1;
+  --light-background: #fff8e6;
+  --deep-purple: #56398d;
+  --dark-blue: #1c5d92;
+  --cta-orange: #f15a2c;
+  --accent-pink: #bf3597;
+
+  /* Legacy mappings to prevent breaking existing classes */
+  --navy: var(--primary-purple);
+  --navy-light: #e6d4e5;
+  --navy-card: #f8f4f8;
+  --gold: var(--secondary-gold);
+  --gold-light: #f5cf74;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  
+  --color-primary-purple: var(--primary-purple);
+  --color-secondary-gold: var(--secondary-gold);
+  --color-accent-blue: var(--accent-blue);
+  --color-deep-purple: var(--deep-purple);
+  --color-dark-blue: var(--dark-blue);
+  --color-cta-orange: var(--cta-orange);
+  --color-accent-pink: var(--accent-pink);
+
   --color-navy: var(--navy);
   --color-navy-light: var(--navy-light);
   --color-navy-card: var(--navy-card);

@@ -38,6 +38,10 @@ interface ShowInfo {
   enableFree: boolean;
   enablePwyw: boolean;
   enableFullFee: boolean;
+  amStartTime: string;
+  amEndTime: string;
+  pmStartTime: string;
+  pmEndTime: string;
 }
 
 interface Performance {
@@ -47,6 +51,7 @@ interface Performance {
   studentCount: string;
   preferredAlternateDate?: string;
   customTime?: string;
+  pmCustomTime?: string;
 }
 
 const contactSchema = z.object({
@@ -119,6 +124,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
           venueLocation: venue,
           studentCount: students,
           customTime: updated[perfIndex]?.customTime,
+          pmCustomTime: updated[perfIndex]?.pmCustomTime,
         };
       } else {
         updated[perfIndex] = {
@@ -127,6 +133,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
           venueLocation: venue,
           studentCount: students,
           customTime: updated[perfIndex]?.customTime,
+          pmCustomTime: updated[perfIndex]?.pmCustomTime,
         };
       }
       return updated;
@@ -182,9 +189,18 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
        if (isNaN(studentCountNum) || studentCountNum < 1 || studentCountNum > 200) return false;
        
        const slot = sameDay ? getSlotsForDate(p.selectedDateStr).find(s => s.timeSlot === "AM") : availableDates.find((d) => d.id === p.showDateId);
+       const pmSlot = sameDay ? getSlotsForDate(p.selectedDateStr).find(s => s.timeSlot === "PM") : undefined;
+       
        if (slot?.timeSlot === "AM" || sameDay) {
          if (!p.customTime || p.customTime.trim().length === 0) return false;
+         if (p.customTime < show.amStartTime || p.customTime > show.amEndTime) return false;
        }
+       
+       if (sameDay || slot?.timeSlot === "PM") {
+         if (!p.pmCustomTime || p.pmCustomTime.trim().length === 0) return false;
+         if (p.pmCustomTime < show.pmStartTime || p.pmCustomTime > show.pmEndTime) return false;
+       }
+
        return true;
     });
 
@@ -217,15 +233,19 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                   showDateId: getSlotsForDate(performances[0]!.selectedDateStr).find(s => s.timeSlot === "PM")?.id ?? "",
                   venueLocation: performances[0]!.venueLocation,
                   studentCount: parseInt(performances[0]!.studentCount, 10) || 1,
+                  customTime: performances[0]!.pmCustomTime,
                 }
               ]
-            : performances.slice(0, performanceCount).map((p) => ({
-                showDateId: p!.showDateId,
-                venueLocation: p!.venueLocation,
-                studentCount: parseInt(p!.studentCount, 10) || 1,
-                preferredAlternateDate: p!.preferredAlternateDate,
-                customTime: p!.customTime,
-              })),
+            : performances.slice(0, performanceCount).map((p) => {
+                const slot = availableDates.find(d => d.id === p!.showDateId);
+                return {
+                  showDateId: p!.showDateId,
+                  venueLocation: p!.venueLocation,
+                  studentCount: parseInt(p!.studentCount, 10) || 1,
+                  preferredAlternateDate: p!.preferredAlternateDate,
+                  customTime: slot?.timeSlot === "PM" ? p!.pmCustomTime : p!.customTime,
+                };
+              }),
         }),
       });
       if (!res.ok) {
@@ -481,7 +501,9 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                   <div className="space-y-1.5 mt-4">
                     <Label>Requested AM Start Time *</Label>
                     <Input
-                      placeholder="e.g. 9:30 AM"
+                      type="time"
+                      min={show.amStartTime}
+                      max={show.amEndTime}
                       value={performances[perfIndex]?.customTime ?? ""}
                       onChange={(e) => {
                         const val = e.target.value;
@@ -494,6 +516,36 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                         });
                       }}
                     />
+                    <p className="text-xs text-gray-500 mt-1">Available between {show.amStartTime} and {show.amEndTime}</p>
+                    {performances[perfIndex]?.customTime && (performances[perfIndex]!.customTime! < show.amStartTime || performances[perfIndex]!.customTime! > show.amEndTime) && (
+                      <p className="text-xs text-red-500 mt-1">Time must be between {show.amStartTime} and {show.amEndTime}</p>
+                    )}
+                  </div>
+                )}
+
+                {(sameDay || selectedSlot?.timeSlot === "PM" || (!sameDay && slots.length === 1 && slots[0].timeSlot === "PM")) && selectedDateStr && (
+                  <div className="space-y-1.5 mt-4">
+                    <Label>Requested PM Start Time *</Label>
+                    <Input
+                      type="time"
+                      min={show.pmStartTime}
+                      max={show.pmEndTime}
+                      value={performances[perfIndex]?.pmCustomTime ?? ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setPerformances((prev) => {
+                          const updated = [...prev];
+                          if (updated[perfIndex]) {
+                            updated[perfIndex] = { ...updated[perfIndex]!, pmCustomTime: val };
+                          }
+                          return updated;
+                        });
+                      }}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Available between {show.pmStartTime} and {show.pmEndTime}</p>
+                    {performances[perfIndex]?.pmCustomTime && (performances[perfIndex]!.pmCustomTime! < show.pmStartTime || performances[perfIndex]!.pmCustomTime! > show.pmEndTime) && (
+                      <p className="text-xs text-red-500 mt-1">Time must be between {show.pmStartTime} and {show.pmEndTime}</p>
+                    )}
                   </div>
                 )}
 
@@ -759,6 +811,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                     </p>
                   )}
                   <p className="text-gray-600">AM Time: {performances[0]?.customTime}</p>
+                  <p className="text-gray-600">PM Time: {performances[0]?.pmCustomTime}</p>
                   <p className="text-gray-600">Venue: {performances[0]?.venueLocation}</p>
                   <p className="text-gray-600">Students: {performances[0]?.studentCount}</p>
                 </div>
@@ -773,6 +826,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                         <span className="text-gold">{slot.timeSlot}</span>
                       </p>
                     )}
+                    <p className="text-gray-600">Time: {slot?.timeSlot === "PM" ? p?.pmCustomTime : p?.customTime}</p>
                     <p className="text-gray-600">Venue: {p?.venueLocation}</p>
                     <p className="text-gray-600">Students: {p?.studentCount}</p>
                   </div>

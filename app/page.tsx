@@ -94,6 +94,10 @@ export default async function Home() {
                   enableFree: show.enableFree,
                   enablePwyw: show.enablePwyw,
                   enableFullFee: show.enableFullFee,
+                  amStartTime: show.amStartTime,
+                  amEndTime: show.amEndTime,
+                  pmStartTime: show.pmStartTime,
+                  pmEndTime: show.pmEndTime,
                 }}
                 availableDates={show.dates.map((d) => ({
                   id: d.id,

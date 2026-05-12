@@ -12,6 +12,10 @@ const showSchema = z.object({
   enableFree: z.boolean().default(true),
   enablePwyw: z.boolean().default(true),
   enableFullFee: z.boolean().default(true),
+  amStartTime: z.string().default("08:00"),
+  amEndTime: z.string().default("12:00"),
+  pmStartTime: z.string().default("12:00"),
+  pmEndTime: z.string().default("16:00"),
   questions: z
     .array(
       z.object({
@@ -53,6 +57,10 @@ export async function POST(req: NextRequest) {
           enableFree: data.enableFree,
           enablePwyw: data.enablePwyw,
           enableFullFee: data.enableFullFee,
+          amStartTime: data.amStartTime,
+          amEndTime: data.amEndTime,
+          pmStartTime: data.pmStartTime,
+          pmEndTime: data.pmEndTime,
         },
       });
 
@@ -99,6 +107,10 @@ export async function POST(req: NextRequest) {
         enableFree: data.enableFree,
         enablePwyw: data.enablePwyw,
         enableFullFee: data.enableFullFee,
+        amStartTime: data.amStartTime,
+        amEndTime: data.amEndTime,
+        pmStartTime: data.pmStartTime,
+        pmEndTime: data.pmEndTime,
         isActive: true,
         customQuestions: {
           create: data.questions.map((q) => ({

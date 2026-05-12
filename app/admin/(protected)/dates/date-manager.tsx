@@ -25,7 +25,7 @@ interface Props {
 
 export function DateManager({ showId, existingDates }: Props) {
   const [dates, setDates] = useState<ShowDate[]>(existingDates);
-  const [selectedDay, setSelectedDay] = useState<Date | undefined>();
+  const [selectedDays, setSelectedDays] = useState<Date[] | undefined>();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
 
@@ -47,25 +47,30 @@ export function DateManager({ showId, existingDates }: Props) {
   }
 
   async function addSlot(timeSlot: TimeSlot) {
-    if (!selectedDay) return;
+    if (!selectedDays || selectedDays.length === 0) return;
     setError("");
     startTransition(async () => {
       try {
-        const res = await fetch("/api/admin/dates", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            showId,
-            date: format(selectedDay, "yyyy-MM-dd"),
-            timeSlot,
-          }),
-        });
-        if (!res.ok) {
+        const newDates: ShowDate[] = [];
+        for (const day of selectedDays) {
+          const res = await fetch("/api/admin/dates", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              showId,
+              date: format(day, "yyyy-MM-dd"),
+              timeSlot,
+            }),
+          });
+          if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.error ?? "Failed to add slot");
+          }
           const data = await res.json();
-          throw new Error(data.error ?? "Failed to add slot");
+          newDates.push(data);
         }
-        const data = await res.json();
-        setDates((prev) => [...prev, data]);
+        setDates((prev) => [...prev, ...newDates]);
+        setSelectedDays(undefined); // Clear selection after adding
       } catch (e) {
         setError(e instanceof Error ? e.message : "Failed to add slot");
       }
@@ -92,10 +97,18 @@ export function DateManager({ showId, existingDates }: Props) {
     });
   }
 
-  const selectedDateStr = selectedDay ? format(selectedDay, "yyyy-MM-dd") : null;
-  const selectedSlots = selectedDateStr ? (dateMap.get(selectedDateStr) ?? []) : [];
-  const hasAM = selectedSlots.some((s) => s.timeSlot === "AM");
-  const hasPM = selectedSlots.some((s) => s.timeSlot === "PM");
+  // Provide a merged view for all selected dates (used to show added slots on selection)
+  const selectedSlots = selectedDays
+    ? selectedDays.flatMap(day => dateMap.get(format(day, "yyyy-MM-dd")) ?? [])
+    : [];
+  const hasAM = selectedDays && selectedDays.length > 0 && selectedDays.every(day => {
+    const slots = dateMap.get(format(day, "yyyy-MM-dd")) ?? [];
+    return slots.some((s) => s.timeSlot === "AM");
+  });
+  const hasPM = selectedDays && selectedDays.length > 0 && selectedDays.every(day => {
+    const slots = dateMap.get(format(day, "yyyy-MM-dd")) ?? [];
+    return slots.some((s) => s.timeSlot === "PM");
+  });
 
   const allDates = Array.from(dateMap.entries())
     .sort(([a], [b]) => a.localeCompare(b))
@@ -108,9 +121,9 @@ export function DateManager({ showId, existingDates }: Props) {
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
           <h2 className="text-foreground font-semibold mb-4">Select a Date</h2>
           <DayPicker
-            mode="single"
-            selected={selectedDay}
-            onSelect={setSelectedDay}
+            mode="multiple"
+            selected={selectedDays}
+            onSelect={setSelectedDays}
             fromDate={new Date()}
             modifiers={{
               available: Array.from(dateMap.entries())
@@ -139,10 +152,12 @@ export function DateManager({ showId, existingDates }: Props) {
         </div>
 
         {/* Add slots panel */}
-        {selectedDay && (
+        {selectedDays && selectedDays.length > 0 && (
           <div className="mt-4 bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-4">
             <h3 className="text-foreground font-semibold">
-              {format(selectedDay, "EEEE, MMMM d, yyyy")}
+              {selectedDays.length === 1
+                ? format(selectedDays[0], "EEEE, MMMM d, yyyy")
+                : `${selectedDays.length} Days Selected`}
             </h3>
 
             {error && <p className="text-red-400 text-sm">{error}</p>}
@@ -168,11 +183,15 @@ export function DateManager({ showId, existingDates }: Props) {
 
             {selectedSlots.length > 0 && (
               <div className="space-y-2">
+                <p className="text-sm font-medium text-foreground">Slots on selected dates:</p>
                 {selectedSlots.map((slot) => (
                   <div
                     key={slot.id}
                     className="flex items-center gap-3 p-3 bg-white rounded-md"
                   >
+                    <span className="text-xs font-semibold text-gray-500 w-24">
+                      {format(parseISO(slot.date.slice(0,10)), "MMM d, yyyy")}
+                    </span>
                     <Badge
                       variant={
                         slot.isBooked

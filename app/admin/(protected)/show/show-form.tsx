@@ -28,6 +28,10 @@ interface Show {
   enableFree: boolean;
   enablePwyw: boolean;
   enableFullFee: boolean;
+  amStartTime: string;
+  amEndTime: string;
+  pmStartTime: string;
+  pmEndTime: string;
   customQuestions: CustomQuestion[];
 }
 
@@ -46,6 +50,10 @@ export function ShowForm({ show }: Props) {
   const [enableFree, setEnableFree] = useState(show?.enableFree ?? true);
   const [enablePwyw, setEnablePwyw] = useState(show?.enablePwyw ?? true);
   const [enableFullFee, setEnableFullFee] = useState(show?.enableFullFee ?? true);
+  const [amStartTime, setAmStartTime] = useState(show?.amStartTime ?? "08:00");
+  const [amEndTime, setAmEndTime] = useState(show?.amEndTime ?? "12:00");
+  const [pmStartTime, setPmStartTime] = useState(show?.pmStartTime ?? "12:00");
+  const [pmEndTime, setPmEndTime] = useState(show?.pmEndTime ?? "16:00");
   const [questions, setQuestions] = useState<Omit<CustomQuestion, "order">[]>(
     show?.customQuestions ?? []
   );
@@ -97,6 +105,10 @@ export function ShowForm({ show }: Props) {
             enableFree,
             enablePwyw,
             enableFullFee,
+            amStartTime,
+            amEndTime,
+            pmStartTime,
+            pmEndTime,
             questions: questions.map((q, i) => ({ ...q, order: i })),
           }),
         });
@@ -209,6 +221,57 @@ export function ShowForm({ show }: Props) {
             />
           </div>
         )}
+      </section>
+
+      {/* Time Slots */}
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-foreground border-b border-gray-200 pb-2">
+          Time Slots Settings
+        </h2>
+        <div className="grid sm:grid-cols-2 gap-5">
+          <div className="space-y-3">
+            <h3 className="font-medium text-foreground">AM Slot</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Start Time</Label>
+                <Input
+                  type="time"
+                  value={amStartTime}
+                  onChange={(e) => setAmStartTime(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>End Time</Label>
+                <Input
+                  type="time"
+                  value={amEndTime}
+                  onChange={(e) => setAmEndTime(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <h3 className="font-medium text-foreground">PM Slot</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Start Time</Label>
+                <Input
+                  type="time"
+                  value={pmStartTime}
+                  onChange={(e) => setPmStartTime(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>End Time</Label>
+                <Input
+                  type="time"
+                  value={pmEndTime}
+                  onChange={(e) => setPmEndTime(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Custom Questions */}
