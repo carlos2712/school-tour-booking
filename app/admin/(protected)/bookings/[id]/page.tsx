@@ -28,11 +28,13 @@ export default async function BookingDetailPage({
   if (!booking) notFound();
 
   const paymentLabel =
-    booking.paymentOption === "FREE"
-      ? "Free Performance"
+    booking.paymentOption === "PINELLAS_COUNTY"
+      ? "Pinellas County District Schools (Fully funded)"
       : booking.paymentOption === "PAY_WHAT_YOU_CAN"
       ? `Pay What You Can${booking.paymentAmount ? ` — $${booking.paymentAmount}` : ""}`
-      : `Full Fee — $${booking.show.fullFeeAmount}`;
+      : booking.paymentOption === "HILLSBOROUGH_COUNTY"
+      ? `Hillsborough County School — $${booking.paymentAmount ?? booking.show.fullFeeAmount}`
+      : `Independent and Private schools — $${booking.paymentAmount ?? booking.show.fullFeeAmount}`;
 
   const customAnswers = booking.customAnswers as Record<string, unknown>;
 

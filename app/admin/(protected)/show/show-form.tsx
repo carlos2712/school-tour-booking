@@ -25,13 +25,16 @@ interface Show {
   images: string[];
   isActive: boolean;
   fullFeeAmount: number;
-  enableFree: boolean;
+  enablePinellasCounty: boolean;
+  enableHillsboroughCounty: boolean;
+  enableIndependentPrivate: boolean;
   enablePwyw: boolean;
-  enableFullFee: boolean;
   amStartTime: string;
   amEndTime: string;
   pmStartTime: string;
   pmEndTime: string;
+  maxStudents: number;
+  doubleBookingDiscountPercent: number;
   customQuestions: CustomQuestion[];
 }
 
@@ -47,13 +50,16 @@ export function ShowForm({ show }: Props) {
   const [title, setTitle] = useState(show?.title ?? "");
   const [description, setDescription] = useState(show?.description ?? "");
   const [fullFeeAmount, setFullFeeAmount] = useState(show?.fullFeeAmount ?? 550);
-  const [enableFree, setEnableFree] = useState(show?.enableFree ?? true);
+  const [enablePinellasCounty, setEnablePinellasCounty] = useState(show?.enablePinellasCounty ?? true);
+  const [enableHillsboroughCounty, setEnableHillsboroughCounty] = useState(show?.enableHillsboroughCounty ?? true);
+  const [enableIndependentPrivate, setEnableIndependentPrivate] = useState(show?.enableIndependentPrivate ?? true);
   const [enablePwyw, setEnablePwyw] = useState(show?.enablePwyw ?? true);
-  const [enableFullFee, setEnableFullFee] = useState(show?.enableFullFee ?? true);
   const [amStartTime, setAmStartTime] = useState(show?.amStartTime ?? "08:00");
   const [amEndTime, setAmEndTime] = useState(show?.amEndTime ?? "12:00");
   const [pmStartTime, setPmStartTime] = useState(show?.pmStartTime ?? "12:00");
   const [pmEndTime, setPmEndTime] = useState(show?.pmEndTime ?? "16:00");
+  const [maxStudents, setMaxStudents] = useState(show?.maxStudents ?? 200);
+  const [doubleBookingDiscountPercent, setDoubleBookingDiscountPercent] = useState(show?.doubleBookingDiscountPercent ?? 0);
   const [questions, setQuestions] = useState<Omit<CustomQuestion, "order">[]>(
     show?.customQuestions ?? []
   );
@@ -102,13 +108,16 @@ export function ShowForm({ show }: Props) {
             description,
             images,
             fullFeeAmount,
-            enableFree,
+            enablePinellasCounty,
+            enableHillsboroughCounty,
+            enableIndependentPrivate,
             enablePwyw,
-            enableFullFee,
             amStartTime,
             amEndTime,
             pmStartTime,
             pmEndTime,
+            maxStudents,
+            doubleBookingDiscountPercent,
             questions: questions.map((q, i) => ({ ...q, order: i })),
           }),
         });
@@ -138,6 +147,16 @@ export function ShowForm({ show }: Props) {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe the show for schools visiting your booking page…"
             className="min-h-[120px]"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Max Students Per Performance *</Label>
+          <Input 
+            type="number"
+            min={1}
+            value={maxStudents}
+            onChange={(e) => setMaxStudents(parseInt(e.target.value) || 200)}
+            className="max-w-xs"
           />
         </div>
       </section>
@@ -185,11 +204,29 @@ export function ShowForm({ show }: Props) {
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
-              checked={enableFree}
-              onChange={(e) => setEnableFree(e.target.checked)}
+              checked={enablePinellasCounty}
+              onChange={(e) => setEnablePinellasCounty(e.target.checked)}
               className="accent-gold w-4 h-4"
             />
-            <span className="text-foreground text-sm">Enable Free Performance option</span>
+            <span className="text-foreground text-sm">Enable Pinellas County (Fully funded) option</span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={enableHillsboroughCounty}
+              onChange={(e) => setEnableHillsboroughCounty(e.target.checked)}
+              className="accent-gold w-4 h-4"
+            />
+            <span className="text-foreground text-sm">Enable Hillsborough County (Regular fee) option</span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={enableIndependentPrivate}
+              onChange={(e) => setEnableIndependentPrivate(e.target.checked)}
+              className="accent-gold w-4 h-4"
+            />
+            <span className="text-foreground text-sm">Enable Independent & Private schools (Regular fee) option</span>
           </label>
           <label className="flex items-center gap-3 cursor-pointer">
             <input
@@ -200,17 +237,8 @@ export function ShowForm({ show }: Props) {
             />
             <span className="text-foreground text-sm">Enable Pay What You Can option</span>
           </label>
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={enableFullFee}
-              onChange={(e) => setEnableFullFee(e.target.checked)}
-              className="accent-gold w-4 h-4"
-            />
-            <span className="text-foreground text-sm">Enable Full Fee option</span>
-          </label>
         </div>
-        {enableFullFee && (
+        {(enableHillsboroughCounty || enableIndependentPrivate) && (
           <div className="space-y-1.5">
             <Label>Full Fee Amount ($)</Label>
             <Input
@@ -221,6 +249,18 @@ export function ShowForm({ show }: Props) {
             />
           </div>
         )}
+        <div className="space-y-1.5 mt-3">
+          <Label>Double Booking Discount (%)</Label>
+          <Input
+            type="number"
+            min={0}
+            max={100}
+            value={doubleBookingDiscountPercent}
+            onChange={(e) => setDoubleBookingDiscountPercent(Number(e.target.value))}
+            className="max-w-xs"
+          />
+          <p className="text-xs text-gray-500">Discount applied when a school books 2 performances.</p>
+        </div>
       </section>
 
       {/* Time Slots */}

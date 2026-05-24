@@ -30,11 +30,13 @@ export function BookingConfirmationEmail({
   fullFeeAmount,
 }: BookingConfirmationEmailProps) {
   const paymentLabel =
-    paymentOption === "FREE"
-      ? "Free Performance"
+    paymentOption === "PINELLAS_COUNTY"
+      ? "Pinellas County District Schools (Fully funded)"
       : paymentOption === "PAY_WHAT_YOU_CAN"
       ? `Pay What You Can${paymentAmount ? ` — $${paymentAmount}` : ""}`
-      : `Full Fee — $${fullFeeAmount}`;
+      : paymentOption === "HILLSBOROUGH_COUNTY"
+      ? `Hillsborough County School — $${paymentAmount ?? (fullFeeAmount * performances.length)}`
+      : `Independent and Private schools — $${paymentAmount ?? (fullFeeAmount * performances.length)}`;
 
   return (
     <div

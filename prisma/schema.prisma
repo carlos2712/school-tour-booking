@@ -14,14 +14,17 @@ model Show {
   images          String[]
   isActive        Boolean          @default(false)
   fullFeeAmount   Int              @default(550)
-  enableFree      Boolean          @default(true)
-  enablePwyw      Boolean          @default(true)
-  enableFullFee   Boolean          @default(true)
+  enablePinellasCounty         Boolean          @default(true)
+  enableHillsboroughCounty     Boolean          @default(true)
+  enableIndependentPrivate     Boolean          @default(true)
+  enablePwyw                   Boolean          @default(true)
   amStartTime     String           @default("08:00")
   amEndTime       String           @default("12:00")
   pmStartTime     String           @default("12:00")
   pmEndTime       String           @default("16:00")
-  createdAt       DateTime         @default(now())
+  maxStudents                  Int              @default(200)
+  doubleBookingDiscountPercent Int              @default(0)
+  createdAt                    DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   dates           ShowDate[]
   customQuestions CustomQuestion[]
@@ -85,9 +88,10 @@ model Booking {
 }
 
 enum PaymentOption {
-  FREE
+  PINELLAS_COUNTY
+  HILLSBOROUGH_COUNTY
+  INDEPENDENT_PRIVATE
   PAY_WHAT_YOU_CAN
-  FULL_FEE
 }
 
 enum BookingStatus {

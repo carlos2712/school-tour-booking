@@ -35,13 +35,16 @@ interface ShowInfo {
   id: string;
   title: string;
   fullFeeAmount: number;
-  enableFree: boolean;
+  enablePinellasCounty: boolean;
+  enableHillsboroughCounty: boolean;
+  enableIndependentPrivate: boolean;
   enablePwyw: boolean;
-  enableFullFee: boolean;
   amStartTime: string;
   amEndTime: string;
   pmStartTime: string;
   pmEndTime: string;
+  maxStudents: number;
+  doubleBookingDiscountPercent: number;
 }
 
 interface Performance {
@@ -78,7 +81,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
   const [performanceCount, setPerformanceCount] = useState<1 | 2>(1);
   const [sameDay, setSameDay] = useState(false);
   const [performances, setPerformances] = useState<Performance[]>([{ selectedDateStr: "", showDateId: "", venueLocation: "", studentCount: "" }]);
-  const [paymentOption, setPaymentOption] = useState<"FREE" | "PAY_WHAT_YOU_CAN" | "FULL_FEE">("FREE");
+  const [paymentOption, setPaymentOption] = useState<"PINELLAS_COUNTY" | "HILLSBOROUGH_COUNTY" | "INDEPENDENT_PRIVATE" | "PAY_WHAT_YOU_CAN">("PINELLAS_COUNTY");
   const [paymentAmount, setPaymentAmount] = useState("");
   const [customAnswers, setCustomAnswers] = useState<Record<string, string | string[]>>({});
   const [notes, setNotes] = useState("");
@@ -123,17 +126,18 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
           showDateId: amSlot ? amSlot.id : "",
           venueLocation: venue,
           studentCount: students,
-          customTime: updated[perfIndex]?.customTime,
-          pmCustomTime: updated[perfIndex]?.pmCustomTime,
+          customTime: updated[perfIndex]?.customTime || show.amStartTime,
+          pmCustomTime: updated[perfIndex]?.pmCustomTime || show.pmStartTime,
         };
       } else {
+        const autoSelectedSlot = slots.length === 1 ? slots[0] : null;
         updated[perfIndex] = {
           selectedDateStr: dateStr,
           showDateId: slots.length === 1 ? slots[0].id : "",
           venueLocation: venue,
           studentCount: students,
-          customTime: updated[perfIndex]?.customTime,
-          pmCustomTime: updated[perfIndex]?.pmCustomTime,
+          customTime: updated[perfIndex]?.customTime || (autoSelectedSlot?.timeSlot === "AM" ? show.amStartTime : ""),
+          pmCustomTime: updated[perfIndex]?.pmCustomTime || (autoSelectedSlot?.timeSlot === "PM" ? show.pmStartTime : ""),
         };
       }
       return updated;
@@ -143,7 +147,15 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
   function handleSlotSelect(perfIndex: number, showDateId: string) {
     setPerformances((prev) => {
       const updated = [...prev];
-      updated[perfIndex] = { ...updated[perfIndex]!, showDateId };
+      const slot = availableDates.find((d) => d.id === showDateId);
+      if (updated[perfIndex]) {
+        updated[perfIndex] = {
+          ...updated[perfIndex]!,
+          showDateId,
+          customTime: slot?.timeSlot === "AM" ? (updated[perfIndex].customTime || show.amStartTime) : updated[perfIndex].customTime,
+          pmCustomTime: slot?.timeSlot === "PM" ? (updated[perfIndex].pmCustomTime || show.pmStartTime) : updated[perfIndex].pmCustomTime,
+        };
+      }
       return updated;
     });
   }
@@ -186,7 +198,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
        if (!sameDay && !p.showDateId) return false;
        if (p.venueLocation.trim().length === 0) return false;
        const studentCountNum = parseInt(p.studentCount, 10);
-       if (isNaN(studentCountNum) || studentCountNum < 1 || studentCountNum > 200) return false;
+       if (isNaN(studentCountNum) || studentCountNum < 1 || studentCountNum > show.maxStudents) return false;
        
        const slot = sameDay ? getSlotsForDate(p.selectedDateStr).find(s => s.timeSlot === "AM") : availableDates.find((d) => d.id === p.showDateId);
        const pmSlot = sameDay ? getSlotsForDate(p.selectedDateStr).find(s => s.timeSlot === "PM") : undefined;
@@ -208,6 +220,19 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
   async function handleSubmitBooking() {
     setSubmitting(true);
     setError("");
+
+    let finalPaymentAmount: number | undefined = undefined;
+    if (paymentOption === "PAY_WHAT_YOU_CAN") {
+      finalPaymentAmount = Number(paymentAmount);
+    } else if (paymentOption === "HILLSBOROUGH_COUNTY" || paymentOption === "INDEPENDENT_PRIVATE") {
+      let baseTotal = show.fullFeeAmount * performanceCount;
+      if (performanceCount === 2 && show.doubleBookingDiscountPercent > 0) {
+        const discountAmt = (baseTotal * show.doubleBookingDiscountPercent) / 100;
+        baseTotal -= discountAmt;
+      }
+      finalPaymentAmount = baseTotal;
+    }
+
     try {
       const res = await fetch("/api/bookings", {
         method: "POST",
@@ -217,8 +242,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
           ...contact,
           performanceCount,
           paymentOption,
-          paymentAmount:
-            paymentOption === "PAY_WHAT_YOU_CAN" ? Number(paymentAmount) : undefined,
+          paymentAmount: finalPaymentAmount,
           notes,
           customAnswers,
                     performances: sameDay
@@ -398,6 +422,11 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                 );
               })}
             </div>
+            {performanceCount === 2 && show.doubleBookingDiscountPercent > 0 && (
+              <p className="mt-3 text-sm font-semibold text-gold bg-gold/10 px-3 py-2 rounded-md inline-block">
+                A {show.doubleBookingDiscountPercent}% discount will be applied to your total price for booking two performances.
+              </p>
+            )}
           </div>
 
           {Array.from({ length: sameDay ? 1 : performanceCount }).map((_, perfIndex) => {
@@ -550,14 +579,16 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                 )}
 
 
-                <div className="grid sm:grid-cols-2 gap-5 mt-4">
+                <div className="grid sm:grid-cols-2 gap-5 mt-4 items-start">
                   <div className="space-y-1.5">
-                    <Label>
-                      School / Venue Location *
-                      <span className="block text-xs text-gray-500 font-normal mt-0.5">
-                        (Where the show will take place - e.g. cafeteria, auditorium)
-                      </span>
-                    </Label>
+                    <div className="min-h-[44px] flex flex-col justify-end">
+                      <Label>
+                        School / Venue Location *
+                        <span className="block text-xs text-gray-500 font-normal mt-0.5">
+                          (Where the show will take place - e.g. cafeteria, auditorium)
+                        </span>
+                      </Label>
+                    </div>
                     <Input
                       placeholder="e.g. Suncoast Elementary School"
                       value={performances[perfIndex]?.venueLocation ?? ""}
@@ -566,11 +597,13 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                   </div>
                   
                   <div className="space-y-1.5">
-                    <Label>Number of Students *</Label>
+                    <div className="min-h-[44px] flex flex-col justify-end">
+                      <Label>Number of Students *</Label>
+                    </div>
                     <Input
                       type="number"
                       min={1}
-                      max={200}
+                      max={show.maxStudents}
                       placeholder="e.g. 150"
                       value={performances[perfIndex]?.studentCount ?? ""}
                       onChange={(e) => {
@@ -584,6 +617,10 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                         });
                       }}
                     />
+                    <p className="text-xs text-gray-500 mt-1">Maximum allowed: {show.maxStudents} students</p>
+                    {performances[perfIndex]?.studentCount && parseInt(performances[perfIndex]!.studentCount, 10) > show.maxStudents && (
+                      <p className="text-xs text-red-500 mt-1">Exceeds maximum allowed of {show.maxStudents} students</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -591,7 +628,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
           })}
 
           <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setStep(0)}>
+            <Button variant="outline" size="lg" onClick={() => setStep(0)}>
               ← Back
             </Button>
             <Button
@@ -614,21 +651,83 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
               Payment Option *
             </Label>
             <div className="space-y-3">
-              {show.enableFree && (
+              {show.enablePinellasCounty && (
                 <label className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 cursor-pointer hover:border-gold/50 transition-colors">
                   <input
                     type="radio"
                     name="payment"
-                    value="FREE"
-                    checked={paymentOption === "FREE"}
-                    onChange={() => setPaymentOption("FREE")}
+                    value="PINELLAS_COUNTY"
+                    checked={paymentOption === "PINELLAS_COUNTY"}
+                    onChange={() => setPaymentOption("PINELLAS_COUNTY")}
                     className="mt-1 accent-gold"
                   />
                   <div>
-                    <p className="font-medium text-foreground">Free Performance</p>
+                    <p className="font-medium text-foreground">Pinellas County District Schools</p>
                     <p className="text-sm text-gray-500">
-                      Fully funded — no cost to your school. Subject to eligibility.
+                      Fully funded — no cost to your school.
                     </p>
+                  </div>
+                </label>
+              )}
+              {show.enableHillsboroughCounty && (
+                <label className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 cursor-pointer hover:border-gold/50 transition-colors">
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="HILLSBOROUGH_COUNTY"
+                    checked={paymentOption === "HILLSBOROUGH_COUNTY"}
+                    onChange={() => setPaymentOption("HILLSBOROUGH_COUNTY")}
+                    className="mt-1 accent-gold"
+                  />
+                  <div>
+                    {performanceCount === 2 && show.doubleBookingDiscountPercent > 0 ? (
+                      <>
+                        <p className="font-medium text-foreground">
+                          Hillsborough County School (${(show.fullFeeAmount * 2) - ((show.fullFeeAmount * 2) * show.doubleBookingDiscountPercent / 100)})
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Regular fee. Includes {show.doubleBookingDiscountPercent}% double booking discount (Regular price: ${show.fullFeeAmount * 2}).
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="font-medium text-foreground">
+                          Hillsborough County School (${show.fullFeeAmount * performanceCount})
+                        </p>
+                        <p className="text-sm text-gray-500">Regular fee.</p>
+                      </>
+                    )}
+                  </div>
+                </label>
+              )}
+              {show.enableIndependentPrivate && (
+                <label className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 cursor-pointer hover:border-gold/50 transition-colors">
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="INDEPENDENT_PRIVATE"
+                    checked={paymentOption === "INDEPENDENT_PRIVATE"}
+                    onChange={() => setPaymentOption("INDEPENDENT_PRIVATE")}
+                    className="mt-1 accent-gold"
+                  />
+                  <div>
+                    {performanceCount === 2 && show.doubleBookingDiscountPercent > 0 ? (
+                      <>
+                        <p className="font-medium text-foreground">
+                          Independent and Private schools (${(show.fullFeeAmount * 2) - ((show.fullFeeAmount * 2) * show.doubleBookingDiscountPercent / 100)})
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          Regular fee. Includes {show.doubleBookingDiscountPercent}% double booking discount (Regular price: ${show.fullFeeAmount * 2}).
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="font-medium text-foreground">
+                          Independent and Private schools (${show.fullFeeAmount * performanceCount})
+                        </p>
+                        <p className="text-sm text-gray-500">Regular fee.</p>
+                      </>
+                    )}
                   </div>
                 </label>
               )}
@@ -645,7 +744,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                   <div className="flex-1">
                     <p className="font-medium text-foreground">Pay What You Can</p>
                     <p className="text-sm text-gray-500 mb-2">
-                      Contribute any amount that works for your budget.
+                      Subject to eligibility. Contribute any amount that works for your budget.
                     </p>
                     {paymentOption === "PAY_WHAT_YOU_CAN" && (
                       <Input
@@ -656,24 +755,6 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                         className="max-w-xs"
                       />
                     )}
-                  </div>
-                </label>
-              )}
-              {show.enableFullFee && (
-                <label className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 cursor-pointer hover:border-gold/50 transition-colors">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="FULL_FEE"
-                    checked={paymentOption === "FULL_FEE"}
-                    onChange={() => setPaymentOption("FULL_FEE")}
-                    className="mt-1 accent-gold"
-                  />
-                  <div>
-                    <p className="font-medium text-foreground">
-                      Full Fee (${show.fullFeeAmount})
-                    </p>
-                    <p className="text-sm text-gray-500">Standard rate per performance.</p>
                   </div>
                 </label>
               )}
@@ -760,7 +841,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
           </div>
 
           <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setStep(1)}>
+            <Button variant="outline" size="lg" onClick={() => setStep(1)}>
               ← Back
             </Button>
             <Button onClick={() => setStep(3)} size="lg" className="flex-1">
@@ -837,10 +918,11 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
             <div className="p-5">
               <h3 className="font-semibold text-gold mb-3">Payment</h3>
               <p className="text-sm">
-                {paymentOption === "FREE" && "Free Performance"}
+                {paymentOption === "PINELLAS_COUNTY" && "Pinellas County District Schools (Fully funded)"}
                 {paymentOption === "PAY_WHAT_YOU_CAN" &&
                   `Pay What You Can${paymentAmount ? ` — $${paymentAmount}` : ""}`}
-                {paymentOption === "FULL_FEE" && `Full Fee — $${show.fullFeeAmount}`}
+                {paymentOption === "HILLSBOROUGH_COUNTY" && `Hillsborough County School — $${performanceCount === 2 && show.doubleBookingDiscountPercent > 0 ? (show.fullFeeAmount * 2) - ((show.fullFeeAmount * 2) * show.doubleBookingDiscountPercent / 100) : show.fullFeeAmount * performanceCount}`}
+                {paymentOption === "INDEPENDENT_PRIVATE" && `Independent and Private schools — $${performanceCount === 2 && show.doubleBookingDiscountPercent > 0 ? (show.fullFeeAmount * 2) - ((show.fullFeeAmount * 2) * show.doubleBookingDiscountPercent / 100) : show.fullFeeAmount * performanceCount}`}
               </p>
             </div>
 
@@ -859,7 +941,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
           )}
 
           <div className="flex gap-3">
-            <Button variant="outline" onClick={() => setStep(2)}>
+            <Button variant="outline" size="lg" onClick={() => setStep(2)}>
               ← Back
             </Button>
             <Button

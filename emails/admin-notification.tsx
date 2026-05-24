@@ -30,11 +30,13 @@ export function AdminNotificationEmail({
   performances,
 }: AdminNotificationEmailProps) {
   const paymentLabel =
-    booking.paymentOption === "FREE"
-      ? "Free Performance"
+    booking.paymentOption === "PINELLAS_COUNTY"
+      ? "Pinellas County District Schools (Fully funded)"
       : booking.paymentOption === "PAY_WHAT_YOU_CAN"
       ? `Pay What You Can${booking.paymentAmount ? ` — $${booking.paymentAmount}` : ""}`
-      : "Full Fee";
+      : booking.paymentOption === "HILLSBOROUGH_COUNTY"
+      ? `Hillsborough County School${booking.paymentAmount ? ` — $${booking.paymentAmount}` : ""}`
+      : `Independent and Private schools${booking.paymentAmount ? ` — $${booking.paymentAmount}` : ""}`;
 
   return (
     <div style={{ fontFamily: "Arial, sans-serif", backgroundColor: "#f9fafb", padding: "32px 20px", maxWidth: "600px", margin: "0 auto" }}>

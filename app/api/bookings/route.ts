@@ -10,7 +10,7 @@ import { format } from "date-fns";
 const performanceSchema = z.object({
   showDateId: z.string().min(1),
   venueLocation: z.string().min(1),
-  studentCount: z.number().min(1).max(200),
+  studentCount: z.number().min(1).max(2000),
   preferredAlternateDate: z.string().optional(),
   customTime: z.string().optional(),
 });
@@ -23,7 +23,7 @@ const bookingSchema = z.object({
   phone: z.string().min(1),
   grades: z.string().min(1),
   performanceCount: z.number().min(1).max(2),
-  paymentOption: z.enum(["FREE", "PAY_WHAT_YOU_CAN", "FULL_FEE"]),
+  paymentOption: z.enum(["PINELLAS_COUNTY", "HILLSBOROUGH_COUNTY", "INDEPENDENT_PRIVATE", "PAY_WHAT_YOU_CAN"]),
   paymentAmount: z.number().optional(),
   notes: z.string().optional(),
   customAnswers: z.record(z.string(), z.unknown()).optional(),
@@ -50,6 +50,23 @@ export async function POST(req: NextRequest) {
         { error: "One or more selected dates are no longer available." },
         { status: 409 }
       );
+    }
+
+    const show = await prisma.show.findUnique({
+      where: { id: data.showId },
+    });
+
+    if (!show) {
+      return NextResponse.json({ error: "Show not found." }, { status: 404 });
+    }
+
+    for (const p of data.performances) {
+      if (p.studentCount > show.maxStudents) {
+        return NextResponse.json(
+          { error: `Student count exceeds max allowed (${show.maxStudents}).` },
+          { status: 400 }
+        );
+      }
     }
 
     // Create booking + mark dates as booked in a transaction

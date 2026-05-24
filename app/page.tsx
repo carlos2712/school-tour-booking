@@ -91,13 +91,16 @@ export default async function Home() {
                   id: show.id,
                   title: show.title,
                   fullFeeAmount: show.fullFeeAmount,
-                  enableFree: show.enableFree,
+                  enablePinellasCounty: show.enablePinellasCounty,
+                  enableHillsboroughCounty: show.enableHillsboroughCounty,
+                  enableIndependentPrivate: show.enableIndependentPrivate,
                   enablePwyw: show.enablePwyw,
-                  enableFullFee: show.enableFullFee,
                   amStartTime: show.amStartTime,
                   amEndTime: show.amEndTime,
                   pmStartTime: show.pmStartTime,
                   pmEndTime: show.pmEndTime,
+                  maxStudents: show.maxStudents,
+                  doubleBookingDiscountPercent: show.doubleBookingDiscountPercent,
                 }}
                 availableDates={show.dates.map((d) => ({
                   id: d.id,
