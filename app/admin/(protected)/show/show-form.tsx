@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Trash2, Plus, GripVertical } from "lucide-react";
+import { ImageUploader } from "@/components/ui/image-uploader";
 
 type QuestionType = "TEXT" | "RADIO" | "CHECKBOX" | "SELECT";
 
@@ -166,7 +167,24 @@ export function ShowForm({ show }: Props) {
         <h2 className="text-lg font-semibold text-foreground border-b border-gray-200 pb-2">
           Show Images
         </h2>
-        <p className="text-gray-500 text-sm">Add image URLs (from Vercel Blob or any public URL).</p>
+        <p className="text-gray-500 text-sm">Add image URLs or upload files directly to Vercel Blob.</p>
+        
+        {/* Modern Interactive Image Uploader */}
+        <div className="space-y-1.5">
+          <Label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Upload Show Poster</Label>
+          <ImageUploader
+            onUploadSuccess={(url) => {
+              setImages((prev) => [...prev, url]);
+            }}
+          />
+        </div>
+
+        <div className="relative flex py-2 items-center">
+          <div className="flex-grow border-t border-gray-200"></div>
+          <span className="flex-shrink mx-4 text-gray-400 text-xs uppercase tracking-wider font-semibold">Or enter manually</span>
+          <div className="flex-grow border-t border-gray-200"></div>
+        </div>
+
         <div className="flex gap-2">
           <Input
             value={imageUrl}

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { Header } from "@/components/header";
 import { BookingFormWrapper } from "@/components/booking-form-wrapper";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -25,8 +26,13 @@ export default async function Home() {
           <>
             {/* Hero */}
             <section className="bg-navy-card border-b border-navy-light">
-              <div className="max-w-6xl mx-auto px-4 py-16 md:py-24 grid md:grid-cols-2 gap-12 items-center">
-                <div>
+              <div className={cn(
+                "max-w-6xl mx-auto px-4 py-16 md:py-24 gap-12 items-center",
+                show.images.length > 0 
+                  ? "grid md:grid-cols-2" 
+                  : "flex flex-col text-center max-w-3xl"
+              )}>
+                <div className={show.images.length > 0 ? "" : "flex flex-col items-center"}>
                   <p className="text-gold text-sm font-semibold tracking-widest uppercase mb-3">
                     Now Touring
                   </p>
@@ -44,7 +50,7 @@ export default async function Home() {
                   </a>
                 </div>
                 {show.images.length > 0 && (
-                  <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-2xl">
+                  <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-2xl w-full">
                     <Image
                       src={show.images[0]}
                       alt={show.title}
