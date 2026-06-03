@@ -2,20 +2,27 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { GoogleSheetsSyncCard } from "./google-sheets-sync-card";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminBookingsPage() {
-  const bookings = await prisma.booking.findMany({
-    include: {
-      show: { select: { title: true } },
-      performances: {
-        include: { showDate: true },
-        orderBy: { showDate: { date: "asc" } },
+  const [bookings, spreadsheetIdSetting, lastSyncSetting] = await Promise.all([
+    prisma.booking.findMany({
+      include: {
+        show: { select: { title: true } },
+        performances: {
+          include: { showDate: true },
+          orderBy: { showDate: { date: "asc" } },
+        },
       },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.setting.findUnique({ where: { key: "google_spreadsheet_id" } }),
+    prisma.setting.findUnique({ where: { key: "last_google_sheets_sync" } }),
+  ]);
+
+  const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || "";
 
   return (
     <div className="p-8">
@@ -23,6 +30,12 @@ export default async function AdminBookingsPage() {
       <p className="text-gray-500 text-sm mb-8">
         {bookings.length} total booking{bookings.length !== 1 ? "s" : ""}
       </p>
+
+      <GoogleSheetsSyncCard
+        serviceAccountEmail={serviceAccountEmail}
+        initialSpreadsheetId={spreadsheetIdSetting?.value || ""}
+        initialLastSyncedAt={lastSyncSetting?.value || ""}
+      />
 
       {bookings.length === 0 ? (
         <p className="text-gray-500">No bookings yet.</p>
