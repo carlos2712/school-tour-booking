@@ -109,7 +109,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
     );
   }
 
-    function handleDateSelect(perfIndex: number, day: Date | undefined) {
+  function handleDateSelect(perfIndex: number, day: Date | undefined) {
     if (!day) return;
     const dateStr = format(day, "yyyy-MM-dd");
     const slots = getSlotsForDate(dateStr);
@@ -118,7 +118,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
       const updated = [...prev];
       const venue = updated[perfIndex]?.venueLocation ?? "";
       const students = updated[perfIndex]?.studentCount ?? "";
-      
+
       if (sameDay) {
         const amSlot = slots.find(s => s.timeSlot === "AM");
         updated[perfIndex] = {
@@ -189,31 +189,31 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
     return id ? availableDates.find((d) => d.id === id) : undefined;
   }
 
-  
+
   const performancesValid = performances
     .slice(0, sameDay ? 1 : performanceCount)
     .every((p) => {
-       if (!p) return false;
-       if (!p.selectedDateStr) return false;
-       if (!sameDay && !p.showDateId) return false;
-       if (p.venueLocation.trim().length === 0) return false;
-       const studentCountNum = parseInt(p.studentCount, 10);
-       if (isNaN(studentCountNum) || studentCountNum < 1 || studentCountNum > show.maxStudents) return false;
-       
-       const slot = sameDay ? getSlotsForDate(p.selectedDateStr).find(s => s.timeSlot === "AM") : availableDates.find((d) => d.id === p.showDateId);
-       const pmSlot = sameDay ? getSlotsForDate(p.selectedDateStr).find(s => s.timeSlot === "PM") : undefined;
-       
-       if (slot?.timeSlot === "AM" || sameDay) {
-         if (!p.customTime || p.customTime.trim().length === 0) return false;
-         if (p.customTime < show.amStartTime || p.customTime > show.amEndTime) return false;
-       }
-       
-       if (sameDay || slot?.timeSlot === "PM") {
-         if (!p.pmCustomTime || p.pmCustomTime.trim().length === 0) return false;
-         if (p.pmCustomTime < show.pmStartTime || p.pmCustomTime > show.pmEndTime) return false;
-       }
+      if (!p) return false;
+      if (!p.selectedDateStr) return false;
+      if (!sameDay && !p.showDateId) return false;
+      if (p.venueLocation.trim().length === 0) return false;
+      const studentCountNum = parseInt(p.studentCount, 10);
+      if (isNaN(studentCountNum) || studentCountNum < 1 || studentCountNum > show.maxStudents) return false;
 
-       return true;
+      const slot = sameDay ? getSlotsForDate(p.selectedDateStr).find(s => s.timeSlot === "AM") : availableDates.find((d) => d.id === p.showDateId);
+      const pmSlot = sameDay ? getSlotsForDate(p.selectedDateStr).find(s => s.timeSlot === "PM") : undefined;
+
+      if (slot?.timeSlot === "AM" || sameDay) {
+        if (!p.customTime || p.customTime.trim().length === 0) return false;
+        if (p.customTime < show.amStartTime || p.customTime > show.amEndTime) return false;
+      }
+
+      if (sameDay || slot?.timeSlot === "PM") {
+        if (!p.pmCustomTime || p.pmCustomTime.trim().length === 0) return false;
+        if (p.pmCustomTime < show.pmStartTime || p.pmCustomTime > show.pmEndTime) return false;
+      }
+
+      return true;
     });
 
 
@@ -245,31 +245,31 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
           paymentAmount: finalPaymentAmount,
           notes,
           customAnswers,
-                    performances: sameDay
+          performances: sameDay
             ? [
-                {
-                    showDateId: getSlotsForDate(performances[0]!.selectedDateStr).find(s => s.timeSlot === "AM")?.id ?? "",
-                  venueLocation: performances[0]!.venueLocation,
-                  studentCount: parseInt(performances[0]!.studentCount, 10) || 1,
-                  customTime: performances[0]!.customTime,
-                },
-                {
-                  showDateId: getSlotsForDate(performances[0]!.selectedDateStr).find(s => s.timeSlot === "PM")?.id ?? "",
-                  venueLocation: performances[0]!.venueLocation,
-                  studentCount: parseInt(performances[0]!.studentCount, 10) || 1,
-                  customTime: performances[0]!.pmCustomTime,
-                }
-              ]
+              {
+                showDateId: getSlotsForDate(performances[0]!.selectedDateStr).find(s => s.timeSlot === "AM")?.id ?? "",
+                venueLocation: performances[0]!.venueLocation,
+                studentCount: parseInt(performances[0]!.studentCount, 10) || 1,
+                customTime: performances[0]!.customTime,
+              },
+              {
+                showDateId: getSlotsForDate(performances[0]!.selectedDateStr).find(s => s.timeSlot === "PM")?.id ?? "",
+                venueLocation: performances[0]!.venueLocation,
+                studentCount: parseInt(performances[0]!.studentCount, 10) || 1,
+                customTime: performances[0]!.pmCustomTime,
+              }
+            ]
             : performances.slice(0, performanceCount).map((p) => {
-                const slot = availableDates.find(d => d.id === p!.showDateId);
-                return {
-                  showDateId: p!.showDateId,
-                  venueLocation: p!.venueLocation,
-                  studentCount: parseInt(p!.studentCount, 10) || 1,
-                  preferredAlternateDate: p!.preferredAlternateDate,
-                  customTime: slot?.timeSlot === "PM" ? p!.pmCustomTime : p!.customTime,
-                };
-              }),
+              const slot = availableDates.find(d => d.id === p!.showDateId);
+              return {
+                showDateId: p!.showDateId,
+                venueLocation: p!.venueLocation,
+                studentCount: parseInt(p!.studentCount, 10) || 1,
+                preferredAlternateDate: p!.preferredAlternateDate,
+                customTime: slot?.timeSlot === "PM" ? p!.pmCustomTime : p!.customTime,
+              };
+            }),
         }),
       });
       if (!res.ok) {
@@ -291,20 +291,18 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
         {STEPS.map((label, i) => (
           <div key={i} className="flex items-center gap-2">
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                i === step
-                  ? "bg-gold text-navy"
-                  : i < step
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${i === step
+                ? "bg-gold text-navy"
+                : i < step
                   ? "bg-emerald-600 text-foreground"
                   : "bg-gray-100 text-gray-500"
-              }`}
+                }`}
             >
               {i < step ? "✓" : i + 1}
             </div>
             <span
-              className={`text-sm hidden sm:block ${
-                i === step ? "text-gold font-semibold" : "text-gray-500"
-              }`}
+              className={`text-sm hidden sm:block ${i === step ? "text-gold font-semibold" : "text-gray-500"
+                }`}
             >
               {label}
             </span>
@@ -411,11 +409,10 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                       handlePerformanceCountChange(count as 1 | 2);
                       if (count === 2) setSameDay(same);
                     }}
-                    className={`px-4 py-2 rounded-md border text-sm font-medium transition-colors ${
-                      isSelected
-                        ? "border-gold bg-gold/10 text-gold"
-                        : "border-gray-200 text-gray-600 hover:border-gold/50"
-                    }`}
+                    className={`px-4 py-2 rounded-md border text-sm font-medium transition-colors ${isSelected
+                      ? "border-gold bg-gold/10 text-gold"
+                      : "border-gray-200 text-gray-600 hover:border-gold/50"
+                      }`}
                   >
                     {label}
                   </button>
@@ -502,11 +499,10 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                           key={slot.id}
                           type="button"
                           onClick={() => handleSlotSelect(perfIndex, slot.id)}
-                          className={`px-8 py-3 rounded-md border font-semibold transition-colors ${
-                            selectedSlot?.id === slot.id
-                              ? "border-gold bg-gold/10 text-gold"
-                              : "border-gray-200 text-gray-600 hover:border-gold/50"
-                          }`}
+                          className={`px-8 py-3 rounded-md border font-semibold transition-colors ${selectedSlot?.id === slot.id
+                            ? "border-gold bg-gold/10 text-gold"
+                            : "border-gray-200 text-gray-600 hover:border-gold/50"
+                            }`}
                         >
                           {slot.timeSlot}
                         </button>
@@ -525,7 +521,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                   </p>
                 )}
 
-                
+
                 {(sameDay || selectedSlot?.timeSlot === "AM" || (!sameDay && slots.length === 1 && slots[0].timeSlot === "AM")) && selectedDateStr && (
                   <div className="space-y-1.5 mt-4">
                     <Label>Requested AM Start Time *</Label>
@@ -595,7 +591,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                       onChange={(e) => handleVenueChange(perfIndex, e.target.value)}
                     />
                   </div>
-                  
+
                   <div className="space-y-1.5">
                     <div className="min-h-[44px] flex flex-col justify-end">
                       <Label>Number of Students *</Label>
@@ -662,9 +658,9 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                     className="mt-1 accent-gold"
                   />
                   <div>
-                    <p className="font-medium text-foreground">Pinellas County District Schools</p>
+                    <p className="font-medium text-foreground">Pinellas County District Schools (PCSB)</p>
                     <p className="text-sm text-gray-500">
-                      Fully funded — no cost to your school.
+                      Fully funded by the District — no cost to your school.
                     </p>
                   </div>
                 </label>
@@ -783,11 +779,10 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                       onClick={() =>
                         setCustomAnswers((prev) => ({ ...prev, [q.id]: opt }))
                       }
-                      className={`px-4 py-2 rounded-md border text-sm ${
-                        customAnswers[q.id] === opt
-                          ? "border-gold bg-gold/10 text-gold"
-                          : "border-gray-200 text-gray-600"
-                      }`}
+                      className={`px-4 py-2 rounded-md border text-sm ${customAnswers[q.id] === opt
+                        ? "border-gold bg-gold/10 text-gold"
+                        : "border-gray-200 text-gray-600"
+                        }`}
                     >
                       {opt}
                     </button>
@@ -816,11 +811,10 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                             };
                           });
                         }}
-                        className={`px-4 py-2 rounded-md border text-sm ${
-                          isChecked
-                            ? "border-gold bg-gold/10 text-gold"
-                            : "border-gray-200 text-gray-600"
-                        }`}
+                        className={`px-4 py-2 rounded-md border text-sm ${isChecked
+                          ? "border-gold bg-gold/10 text-gold"
+                          : "border-gray-200 text-gray-600"
+                          }`}
                       >
                         {opt}
                       </button>
@@ -883,7 +877,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
 
             <div className="p-5">
               <h3 className="font-semibold text-gold mb-3">Performances</h3>
-                            {sameDay ? (
+              {sameDay ? (
                 <div className="mb-3 text-sm">
                   <p className="font-medium text-foreground">Both AM & PM Performances</p>
                   {performances[0]?.selectedDateStr && (
