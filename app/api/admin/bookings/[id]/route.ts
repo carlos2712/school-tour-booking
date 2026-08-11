@@ -51,8 +51,8 @@ export async function GET(
   }
 
   const { id } = await params;
-  const booking = await prisma.booking.findUnique({
-    where: { id },
+  const booking = await prisma.booking.findFirst({
+    where: { id, deletedAt: null },
     include: {
       show: true,
       performances: { include: { showDate: true } },
@@ -61,4 +61,44 @@ export async function GET(
 
   if (!booking) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(booking);
+}
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  if (!(await requireAdmin())) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+
+  const booking = await prisma.booking.findFirst({
+    where: { id, deletedAt: null },
+    include: { performances: true },
+  });
+
+  if (!booking) {
+    return NextResponse.json({ error: "Booking not found" }, { status: 404 });
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.booking.update({
+      where: { id },
+      data: {
+        deletedAt: new Date(),
+        status: "CANCELLED",
+      },
+    });
+
+    if (booking.performances.length > 0) {
+      const showDateIds = booking.performances.map((p) => p.showDateId);
+      await tx.showDate.updateMany({
+        where: { id: { in: showDateIds } },
+        data: { isBooked: false },
+      });
+    }
+  });
+
+  return NextResponse.json({ success: true, message: "Booking soft deleted" });
 }

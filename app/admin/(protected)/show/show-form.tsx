@@ -277,7 +277,7 @@ export function ShowForm({ show }: Props) {
             onChange={(e) => setDoubleBookingDiscountPercent(Number(e.target.value))}
             className="max-w-xs"
           />
-          <p className="text-xs text-gray-500">Discount applied when a school books 2 performances.</p>
+          <p className="text-xs text-gray-500">Discount percentage applied to the 2nd show when booking 2 performances.</p>
         </div>
       </section>
 

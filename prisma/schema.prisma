@@ -84,6 +84,7 @@ model Booking {
   status           BookingStatus        @default(CONFIRMED)
   customAnswers    Json                 @default("{}")
   performances     BookingPerformance[]
+  deletedAt        DateTime?
   createdAt        DateTime             @default(now())
 }
 

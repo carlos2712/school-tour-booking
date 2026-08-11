@@ -38,6 +38,7 @@ export async function syncBookingsToGoogleSheets() {
 
   // Query all bookings ordered by creation date ascending
   const bookings = await prisma.booking.findMany({
+    where: { deletedAt: null },
     include: {
       show: { select: { title: true } },
       performances: {

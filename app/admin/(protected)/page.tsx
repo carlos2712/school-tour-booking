@@ -6,8 +6,8 @@ export const dynamic = "force-dynamic";
 export default async function AdminDashboard() {
   const [show, totalBookings, confirmedBookings] = await Promise.all([
     prisma.show.findFirst({ where: { isActive: true } }),
-    prisma.booking.count(),
-    prisma.booking.count({ where: { status: "CONFIRMED" } }),
+    prisma.booking.count({ where: { deletedAt: null } }),
+    prisma.booking.count({ where: { status: "CONFIRMED", deletedAt: null } }),
   ]);
 
   const upcomingDates = show
@@ -65,10 +65,11 @@ export default async function AdminDashboard() {
       {/* Quick links */}
       <div>
         <h2 className="text-lg font-semibold text-foreground mb-3">Quick Actions</h2>
-        <div className="grid sm:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <QuickLink href="/admin/show" label="Edit Show Details" desc="Update title, description, images, pricing" />
           <QuickLink href="/admin/dates" label="Manage Dates" desc="Add or remove available performance slots" />
           <QuickLink href="/admin/bookings" label="View Bookings" desc="See all school bookings and their status" />
+          <QuickLink href="/admin/settings" label="Email Settings" desc="Manage booking notification email list" />
         </div>
       </div>
     </div>

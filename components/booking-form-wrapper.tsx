@@ -221,16 +221,21 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
     setSubmitting(true);
     setError("");
 
+    const secondShowDiscountAmt =
+      performanceCount === 2 && show.doubleBookingDiscountPercent > 0
+        ? (show.fullFeeAmount * show.doubleBookingDiscountPercent) / 100
+        : 0;
+    const secondShowPrice = show.fullFeeAmount - secondShowDiscountAmt;
+    const doubleBookingTotal =
+      performanceCount === 2
+        ? show.fullFeeAmount + secondShowPrice
+        : show.fullFeeAmount * performanceCount;
+
     let finalPaymentAmount: number | undefined = undefined;
     if (paymentOption === "PAY_WHAT_YOU_CAN") {
       finalPaymentAmount = Number(paymentAmount);
     } else if (paymentOption === "HILLSBOROUGH_COUNTY" || paymentOption === "INDEPENDENT_PRIVATE") {
-      let baseTotal = show.fullFeeAmount * performanceCount;
-      if (performanceCount === 2 && show.doubleBookingDiscountPercent > 0) {
-        const discountAmt = (baseTotal * show.doubleBookingDiscountPercent) / 100;
-        baseTotal -= discountAmt;
-      }
-      finalPaymentAmount = baseTotal;
+      finalPaymentAmount = doubleBookingTotal;
     }
 
     try {
@@ -420,9 +425,14 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
               })}
             </div>
             {performanceCount === 2 && show.doubleBookingDiscountPercent > 0 && (
-              <p className="mt-3 text-sm font-semibold text-gold bg-gold/10 px-3 py-2 rounded-md inline-block">
-                A {show.doubleBookingDiscountPercent}% discount will be applied to your total price for booking two performances.
-              </p>
+              <div className="mt-3 text-sm text-gold bg-gold/10 p-3 rounded-md border border-gold/20 space-y-1">
+                <p className="font-semibold">
+                  A {show.doubleBookingDiscountPercent}% discount will be applied to your 2nd show!
+                </p>
+                <p className="text-xs text-gray-600">
+                  1st Show: <span className="font-medium text-foreground">${show.fullFeeAmount}</span> • 2nd Show: <span className="font-medium text-foreground">${show.fullFeeAmount - ((show.fullFeeAmount * show.doubleBookingDiscountPercent) / 100)}</span> (Saved ${(show.fullFeeAmount * show.doubleBookingDiscountPercent) / 100}) • <span className="font-bold text-gold">Total: ${show.fullFeeAmount + (show.fullFeeAmount - ((show.fullFeeAmount * show.doubleBookingDiscountPercent) / 100))}</span>
+                </p>
+              </div>
             )}
           </div>
 
@@ -579,9 +589,9 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                   <div className="space-y-1.5">
                     <div className="min-h-[44px] flex flex-col justify-end">
                       <Label>
-                        School / Venue Location *
+                        Performance Space / Location *
                         <span className="block text-xs text-gray-500 font-normal mt-0.5">
-                          (Where the show will take place - e.g. cafeteria, auditorium)
+                          (e.g., School auditorium, cafeteria, classroom)
                         </span>
                       </Label>
                     </div>
@@ -679,10 +689,10 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                     {performanceCount === 2 && show.doubleBookingDiscountPercent > 0 ? (
                       <>
                         <p className="font-medium text-foreground">
-                          Hillsborough County School (${(show.fullFeeAmount * 2) - ((show.fullFeeAmount * 2) * show.doubleBookingDiscountPercent / 100)})
+                          Hillsborough County School (${show.fullFeeAmount + (show.fullFeeAmount - ((show.fullFeeAmount * show.doubleBookingDiscountPercent) / 100))})
                         </p>
                         <p className="text-sm text-gray-500">
-                          Regular fee. Includes {show.doubleBookingDiscountPercent}% double booking discount (Regular price: ${show.fullFeeAmount * 2}).
+                          1st Show: ${show.fullFeeAmount} + 2nd Show: ${show.fullFeeAmount - ((show.fullFeeAmount * show.doubleBookingDiscountPercent) / 100)} ({show.doubleBookingDiscountPercent}% discount applied to 2nd show).
                         </p>
                       </>
                     ) : (
@@ -710,16 +720,16 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                     {performanceCount === 2 && show.doubleBookingDiscountPercent > 0 ? (
                       <>
                         <p className="font-medium text-foreground">
-                          Independent and Private schools (${(show.fullFeeAmount * 2) - ((show.fullFeeAmount * 2) * show.doubleBookingDiscountPercent / 100)})
+                          Independent, Charter and Private schools (${show.fullFeeAmount + (show.fullFeeAmount - ((show.fullFeeAmount * show.doubleBookingDiscountPercent) / 100))})
                         </p>
                         <p className="text-sm text-gray-500">
-                          Regular fee. Includes {show.doubleBookingDiscountPercent}% double booking discount (Regular price: ${show.fullFeeAmount * 2}).
+                          1st Show: ${show.fullFeeAmount} + 2nd Show: ${show.fullFeeAmount - ((show.fullFeeAmount * show.doubleBookingDiscountPercent) / 100)} ({show.doubleBookingDiscountPercent}% discount applied to 2nd show).
                         </p>
                       </>
                     ) : (
                       <>
                         <p className="font-medium text-foreground">
-                          Independent and Private schools (${show.fullFeeAmount * performanceCount})
+                          Independent, Charter and Private schools (${show.fullFeeAmount * performanceCount})
                         </p>
                         <p className="text-sm text-gray-500">Regular fee.</p>
                       </>
@@ -911,13 +921,41 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
 
             <div className="p-5">
               <h3 className="font-semibold text-gold mb-3">Payment</h3>
-              <p className="text-sm">
-                {paymentOption === "PINELLAS_COUNTY" && "Pinellas County District Schools (Fully funded)"}
-                {paymentOption === "PAY_WHAT_YOU_CAN" &&
-                  `Pay What You Can${paymentAmount ? ` — $${paymentAmount}` : ""}`}
-                {paymentOption === "HILLSBOROUGH_COUNTY" && `Hillsborough County School — $${performanceCount === 2 && show.doubleBookingDiscountPercent > 0 ? (show.fullFeeAmount * 2) - ((show.fullFeeAmount * 2) * show.doubleBookingDiscountPercent / 100) : show.fullFeeAmount * performanceCount}`}
-                {paymentOption === "INDEPENDENT_PRIVATE" && `Independent and Private schools — $${performanceCount === 2 && show.doubleBookingDiscountPercent > 0 ? (show.fullFeeAmount * 2) - ((show.fullFeeAmount * 2) * show.doubleBookingDiscountPercent / 100) : show.fullFeeAmount * performanceCount}`}
-              </p>
+              {paymentOption === "PINELLAS_COUNTY" && (
+                <p className="text-sm text-foreground">Pinellas County District Schools (Fully funded)</p>
+              )}
+              {paymentOption === "PAY_WHAT_YOU_CAN" && (
+                <p className="text-sm text-foreground">
+                  Pay What You Can{paymentAmount ? ` — $${paymentAmount}` : ""}
+                </p>
+              )}
+              {(paymentOption === "HILLSBOROUGH_COUNTY" || paymentOption === "INDEPENDENT_PRIVATE") && (
+                <div className="text-sm space-y-2">
+                  <p className="font-medium text-foreground">
+                    {paymentOption === "HILLSBOROUGH_COUNTY"
+                      ? "Hillsborough County School"
+                      : "Independent and Private schools"}
+                  </p>
+                  {performanceCount === 2 && show.doubleBookingDiscountPercent > 0 ? (
+                    <div className="bg-gray-50 p-3 rounded-md space-y-1 text-xs text-gray-600 border border-gray-200">
+                      <div className="flex justify-between">
+                        <span>1st Show Price:</span>
+                        <span className="font-medium text-foreground">${show.fullFeeAmount}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>2nd Show Price ({show.doubleBookingDiscountPercent}% discount):</span>
+                        <span className="font-medium text-foreground">${show.fullFeeAmount - ((show.fullFeeAmount * show.doubleBookingDiscountPercent) / 100)} <span className="text-emerald-600">(-${(show.fullFeeAmount * show.doubleBookingDiscountPercent) / 100})</span></span>
+                      </div>
+                      <div className="flex justify-between pt-1 border-t border-gray-200 font-semibold text-sm text-gold">
+                        <span>Total Price:</span>
+                        <span>${show.fullFeeAmount + (show.fullFeeAmount - ((show.fullFeeAmount * show.doubleBookingDiscountPercent) / 100))}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-gray-600">Total: ${show.fullFeeAmount * performanceCount}</p>
+                  )}
+                </div>
+              )}
             </div>
 
             {notes && (

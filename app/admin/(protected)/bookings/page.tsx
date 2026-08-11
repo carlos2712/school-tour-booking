@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminBookingsPage() {
   const [bookings, spreadsheetIdSetting, lastSyncSetting] = await Promise.all([
     prisma.booking.findMany({
+      where: { deletedAt: null },
       include: {
         show: { select: { title: true } },
         performances: {

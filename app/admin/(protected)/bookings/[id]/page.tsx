@@ -14,8 +14,8 @@ export default async function BookingDetailPage({
 }) {
   const { id } = await params;
 
-  const booking = await prisma.booking.findUnique({
-    where: { id },
+  const booking = await prisma.booking.findFirst({
+    where: { id, deletedAt: null },
     include: {
       show: true,
       performances: {
@@ -31,10 +31,10 @@ export default async function BookingDetailPage({
     booking.paymentOption === "PINELLAS_COUNTY"
       ? "Pinellas County District Schools (Fully funded)"
       : booking.paymentOption === "PAY_WHAT_YOU_CAN"
-      ? `Pay What You Can${booking.paymentAmount ? ` — $${booking.paymentAmount}` : ""}`
-      : booking.paymentOption === "HILLSBOROUGH_COUNTY"
-      ? `Hillsborough County School — $${booking.paymentAmount ?? booking.show.fullFeeAmount}`
-      : `Independent and Private schools — $${booking.paymentAmount ?? booking.show.fullFeeAmount}`;
+        ? `Pay What You Can${booking.paymentAmount ? ` — $${booking.paymentAmount}` : ""}`
+        : booking.paymentOption === "HILLSBOROUGH_COUNTY"
+          ? `Hillsborough County School — $${booking.paymentAmount ?? booking.show.fullFeeAmount}`
+          : `IndependenIndependent, Chartert and Private schools — $${booking.paymentAmount ?? booking.show.fullFeeAmount}`;
 
   const customAnswers = booking.customAnswers as Record<string, unknown>;
 
@@ -60,8 +60,8 @@ export default async function BookingDetailPage({
             booking.status === "CONFIRMED"
               ? "confirmed"
               : booking.status === "CANCELLED"
-              ? "cancelled"
-              : "modified"
+                ? "cancelled"
+                : "modified"
           }
           className="text-sm px-3 py-1"
         >
@@ -141,6 +141,7 @@ export default async function BookingDetailPage({
         {/* Admin actions */}
         <BookingActions
           bookingId={booking.id}
+          schoolName={booking.schoolName}
           currentStatus={booking.status}
           performances={booking.performances.map((p) => ({
             showDateId: p.showDateId,

@@ -29,6 +29,7 @@ export default async function AdminLayout({
           <NavLink href="/admin/show">Show Setup</NavLink>
           <NavLink href="/admin/dates">Manage Dates</NavLink>
           <NavLink href="/admin/bookings">Bookings</NavLink>
+          <NavLink href="/admin/settings">Settings</NavLink>
         </nav>
         <div className="p-4 border-t border-gray-200">
           <p className="text-gray-500 text-xs mb-2 truncate">{session.user?.email}</p>

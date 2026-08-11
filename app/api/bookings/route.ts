@@ -122,9 +122,36 @@ export async function POST(req: NextRequest) {
       venueLocation: p.venueLocation,
       studentCount: p.studentCount,
       customTime: p.customTime ?? undefined,
+      preferredAlternateDate: p.preferredAlternateDate
+        ? format(new Date(p.preferredAlternateDate), "EEEE, MMMM d, yyyy")
+        : undefined,
     }));
 
-    await Promise.allSettled([
+    // Fetch configured admin notification recipients
+    const adminEmailSetting = await prisma.setting.findUnique({
+      where: { key: "admin_notification_emails" },
+    });
+
+    let adminEmails: string[] = [];
+    if (adminEmailSetting?.value) {
+      try {
+        const parsed = JSON.parse(adminEmailSetting.value);
+        if (Array.isArray(parsed)) {
+          adminEmails = parsed.map((e) => String(e).trim()).filter(Boolean);
+        }
+      } catch {
+        adminEmails = adminEmailSetting.value
+          .split(",")
+          .map((e) => e.trim())
+          .filter(Boolean);
+      }
+    }
+
+    if (adminEmails.length === 0 && ADMIN_EMAIL) {
+      adminEmails = [ADMIN_EMAIL];
+    }
+
+    const emailPromises: Promise<any>[] = [
       resend.emails.send({
         from: FROM_EMAIL,
         to: booking.email,
@@ -138,29 +165,44 @@ export async function POST(req: NextRequest) {
           paymentOption: booking.paymentOption,
           paymentAmount: booking.paymentAmount ?? undefined,
           fullFeeAmount: booking.show.fullFeeAmount,
+          phone: booking.phone,
+          grades: booking.grades,
+          notes: booking.notes ?? undefined,
         }),
       }),
-      resend.emails.send({
-        from: FROM_EMAIL,
-        to: ADMIN_EMAIL,
-        subject: `New Booking: ${booking.schoolName} — ${booking.show.title}`,
-        react: AdminNotificationEmail({
-          booking: {
-            id: booking.id,
-            schoolName: booking.schoolName,
-            contactName: booking.contactName,
-            email: booking.email,
-            phone: booking.phone,
-            grades: booking.grades,
-            paymentOption: booking.paymentOption,
-            paymentAmount: booking.paymentAmount ?? undefined,
-            notes: booking.notes ?? undefined,
-          },
-          showTitle: booking.show.title,
-          performances: performanceDetails,
-        }),
-      }),
-    ]);
+    ];
+
+    if (adminEmails.length > 0) {
+      emailPromises.push(
+        resend.emails.send({
+          from: FROM_EMAIL,
+          to: adminEmails,
+          subject: `New Booking: ${booking.schoolName} — ${booking.show.title}`,
+          react: AdminNotificationEmail({
+            booking: {
+              id: booking.id,
+              schoolName: booking.schoolName,
+              contactName: booking.contactName,
+              email: booking.email,
+              phone: booking.phone,
+              grades: booking.grades,
+              paymentOption: booking.paymentOption,
+              paymentAmount: booking.paymentAmount ?? undefined,
+              notes: booking.notes ?? undefined,
+            },
+            showTitle: booking.show.title,
+            performances: performanceDetails,
+          }),
+        })
+      );
+    }
+
+    const results = await Promise.allSettled(emailPromises);
+    results.forEach((res, index) => {
+      if (res.status === "rejected") {
+        console.error(`Email error for promise ${index}:`, res.reason);
+      }
+    });
 
     return NextResponse.json({ id: booking.id });
   } catch (error) {
