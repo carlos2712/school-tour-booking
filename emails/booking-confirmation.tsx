@@ -243,7 +243,7 @@ export function BookingConfirmationEmail({
         </p>
         <p style={{ marginTop: "6px", marginBottom: "16px" }}>
           <a
-            href="mailto:education@americanstage.com"
+            href="mailto:education@americanstage.org"
             style={{
               color: "#c9a84c",
               fontWeight: "bold",
@@ -251,7 +251,7 @@ export function BookingConfirmationEmail({
               textDecoration: "underline",
             }}
           >
-            education@americanstage.com
+            education@americanstage.org
           </a>
         </p>
         <p style={{ color: "#4b5563", fontSize: "12px", margin: 0 }}>
