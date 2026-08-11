@@ -70,42 +70,48 @@ export async function POST(req: NextRequest) {
     }
 
     // Create booking + mark dates as booked in a transaction
-    const bookingId = await prisma.$transaction(async (tx) => {
-      const booking = await tx.booking.create({
-        data: {
-          showId: data.showId,
-          schoolName: data.schoolName,
-          contactName: data.contactName,
-          email: data.email,
-          phone: data.phone,
-          grades: data.grades,
-          performanceCount: data.performanceCount,
-          paymentOption: data.paymentOption,
-          paymentAmount: data.paymentAmount,
-          notes: data.notes,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          customAnswers: (data.customAnswers ?? {}) as any,
-          performances: {
-            create: data.performances.map((p) => ({
-              showDateId: p.showDateId,
-              venueLocation: p.venueLocation,
-              studentCount: p.studentCount,
-              preferredAlternateDate: p.preferredAlternateDate
-                ? new Date(p.preferredAlternateDate)
-                : null,
-              customTime: p.customTime,
-            })),
+    const bookingId = await prisma.$transaction(
+      async (tx) => {
+        const booking = await tx.booking.create({
+          data: {
+            showId: data.showId,
+            schoolName: data.schoolName,
+            contactName: data.contactName,
+            email: data.email,
+            phone: data.phone,
+            grades: data.grades,
+            performanceCount: data.performanceCount,
+            paymentOption: data.paymentOption,
+            paymentAmount: data.paymentAmount,
+            notes: data.notes,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            customAnswers: (data.customAnswers ?? {}) as any,
+            performances: {
+              create: data.performances.map((p) => ({
+                showDateId: p.showDateId,
+                venueLocation: p.venueLocation,
+                studentCount: p.studentCount,
+                preferredAlternateDate: p.preferredAlternateDate
+                  ? new Date(p.preferredAlternateDate)
+                  : null,
+                customTime: p.customTime,
+              })),
+            },
           },
-        },
-      });
+        });
 
-      await tx.showDate.updateMany({
-        where: { id: { in: data.performances.map((p) => p.showDateId) } },
-        data: { isBooked: true },
-      });
+        await tx.showDate.updateMany({
+          where: { id: { in: data.performances.map((p) => p.showDateId) } },
+          data: { isBooked: true },
+        });
 
-      return booking.id;
-    });
+        return booking.id;
+      },
+      {
+        maxWait: 10000,
+        timeout: 20000,
+      }
+    );
 
     // Fetch full booking after transaction for email
     const booking = await prisma.booking.findUniqueOrThrow({

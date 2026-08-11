@@ -49,55 +49,58 @@ export async function POST(req: NextRequest) {
 
   if (data.id) {
     // Update existing show
-    await prisma.$transaction(async (tx) => {
-      await tx.show.update({
-        where: { id: data.id },
-        data: {
-          title: data.title,
-          description: data.description,
-          images: data.images,
-          fullFeeAmount: data.fullFeeAmount,
-          enablePinellasCounty: data.enablePinellasCounty,
-          enableHillsboroughCounty: data.enableHillsboroughCounty,
-          enableIndependentPrivate: data.enableIndependentPrivate,
-          enablePwyw: data.enablePwyw,
-          amStartTime: data.amStartTime,
-          amEndTime: data.amEndTime,
-          pmStartTime: data.pmStartTime,
-          pmEndTime: data.pmEndTime,
-          maxStudents: data.maxStudents,
-          doubleBookingDiscountPercent: data.doubleBookingDiscountPercent,
-        },
-      });
-
-      // Delete removed questions and upsert existing ones
-      const incomingIds = data.questions.map((q) => q.id);
-      await tx.customQuestion.deleteMany({
-        where: { showId: data.id, id: { notIn: incomingIds } },
-      });
-
-      for (const q of data.questions) {
-        await tx.customQuestion.upsert({
-          where: { id: q.id },
-          create: {
-            id: q.id,
-            showId: data.id!,
-            text: q.text,
-            type: q.type,
-            options: q.options,
-            isRequired: q.isRequired,
-            order: q.order,
-          },
-          update: {
-            text: q.text,
-            type: q.type,
-            options: q.options,
-            isRequired: q.isRequired,
-            order: q.order,
+    await prisma.$transaction(
+      async (tx) => {
+        await tx.show.update({
+          where: { id: data.id },
+          data: {
+            title: data.title,
+            description: data.description,
+            images: data.images,
+            fullFeeAmount: data.fullFeeAmount,
+            enablePinellasCounty: data.enablePinellasCounty,
+            enableHillsboroughCounty: data.enableHillsboroughCounty,
+            enableIndependentPrivate: data.enableIndependentPrivate,
+            enablePwyw: data.enablePwyw,
+            amStartTime: data.amStartTime,
+            amEndTime: data.amEndTime,
+            pmStartTime: data.pmStartTime,
+            pmEndTime: data.pmEndTime,
+            maxStudents: data.maxStudents,
+            doubleBookingDiscountPercent: data.doubleBookingDiscountPercent,
           },
         });
-      }
-    });
+
+        // Delete removed questions and upsert existing ones
+        const incomingIds = data.questions.map((q) => q.id);
+        await tx.customQuestion.deleteMany({
+          where: { showId: data.id, id: { notIn: incomingIds } },
+        });
+
+        for (const q of data.questions) {
+          await tx.customQuestion.upsert({
+            where: { id: q.id },
+            create: {
+              id: q.id,
+              showId: data.id!,
+              text: q.text,
+              type: q.type,
+              options: q.options,
+              isRequired: q.isRequired,
+              order: q.order,
+            },
+            update: {
+              text: q.text,
+              type: q.type,
+              options: q.options,
+              isRequired: q.isRequired,
+              order: q.order,
+            },
+          });
+        }
+      },
+      { maxWait: 10000, timeout: 20000 }
+    );
 
     return NextResponse.json({ success: true });
   } else {

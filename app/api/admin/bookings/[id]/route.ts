@@ -25,19 +25,22 @@ export async function PATCH(
     })
     .parse(body);
 
-  await prisma.$transaction(async (tx) => {
-    await tx.booking.update({ where: { id }, data: { status } });
+  await prisma.$transaction(
+    async (tx) => {
+      await tx.booking.update({ where: { id }, data: { status } });
 
-    if (freeSlots && status === "CANCELLED") {
-      const performances = await tx.bookingPerformance.findMany({
-        where: { bookingId: id },
-      });
-      await tx.showDate.updateMany({
-        where: { id: { in: performances.map((p) => p.showDateId) } },
-        data: { isBooked: false },
-      });
-    }
-  });
+      if (freeSlots && status === "CANCELLED") {
+        const performances = await tx.bookingPerformance.findMany({
+          where: { bookingId: id },
+        });
+        await tx.showDate.updateMany({
+          where: { id: { in: performances.map((p) => p.showDateId) } },
+          data: { isBooked: false },
+        });
+      }
+    },
+    { maxWait: 10000, timeout: 20000 }
+  );
 
   return NextResponse.json({ success: true });
 }
@@ -82,23 +85,26 @@ export async function DELETE(
     return NextResponse.json({ error: "Booking not found" }, { status: 404 });
   }
 
-  await prisma.$transaction(async (tx) => {
-    await tx.booking.update({
-      where: { id },
-      data: {
-        deletedAt: new Date(),
-        status: "CANCELLED",
-      },
-    });
-
-    if (booking.performances.length > 0) {
-      const showDateIds = booking.performances.map((p) => p.showDateId);
-      await tx.showDate.updateMany({
-        where: { id: { in: showDateIds } },
-        data: { isBooked: false },
+  await prisma.$transaction(
+    async (tx) => {
+      await tx.booking.update({
+        where: { id },
+        data: {
+          deletedAt: new Date(),
+          status: "CANCELLED",
+        },
       });
-    }
-  });
+
+      if (booking.performances.length > 0) {
+        const showDateIds = booking.performances.map((p) => p.showDateId);
+        await tx.showDate.updateMany({
+          where: { id: { in: showDateIds } },
+          data: { isBooked: false },
+        });
+      }
+    },
+    { maxWait: 10000, timeout: 20000 }
+  );
 
   return NextResponse.json({ success: true, message: "Booking soft deleted" });
 }
