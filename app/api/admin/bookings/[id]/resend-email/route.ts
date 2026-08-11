@@ -43,7 +43,7 @@ export async function POST(
     const { data, error } = await resend.emails.send({
       from: FROM_EMAIL,
       to: booking.email,
-      subject: `Booking Confirmed: ${booking.show.title}`,
+      subject: `American Stage School Tour booking Confirmation: ${booking.show.title}`,
       react: BookingConfirmationEmail({
         contactName: booking.contactName,
         schoolName: booking.schoolName,
