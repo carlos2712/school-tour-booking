@@ -29,7 +29,7 @@ export default async function BookingDetailPage({
 
   const paymentLabel =
     booking.paymentOption === "PINELLAS_COUNTY"
-      ? "Pinellas County District Schools (Fully funded)"
+      ? "Pinellas County District Schools (PCSB) — Fully funded by the District for PCSB schools only"
       : booking.paymentOption === "PAY_WHAT_YOU_CAN"
         ? `Pay What You Can${booking.paymentAmount ? ` — $${booking.paymentAmount}` : ""}`
         : booking.paymentOption === "HILLSBOROUGH_COUNTY"

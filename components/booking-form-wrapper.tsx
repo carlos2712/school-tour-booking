@@ -682,7 +682,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                   <div>
                     <p className="font-medium text-foreground">Pinellas County District Schools (PCSB)</p>
                     <p className="text-sm text-gray-500">
-                      Fully funded by the District — no cost to your school.
+                      Fully funded by the District for PCSB schools only.
                     </p>
                   </div>
                 </label>
@@ -938,7 +938,9 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
             <div className="p-5">
               <h3 className="font-semibold text-gold mb-3">Payment</h3>
               {paymentOption === "PINELLAS_COUNTY" && (
-                <p className="text-sm text-foreground">Pinellas County District Schools (Fully funded)</p>
+                <p className="text-sm text-foreground">
+                  Pinellas County District Schools (PCSB) — Fully funded by the District for PCSB schools only
+                </p>
               )}
               {paymentOption === "PAY_WHAT_YOU_CAN" && (
                 <p className="text-sm text-foreground">
