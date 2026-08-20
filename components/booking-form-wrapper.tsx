@@ -62,6 +62,7 @@ const contactSchema = z.object({
   contactName: z.string().min(1, "Contact name is required"),
   email: z.string().email("Valid email is required"),
   phone: z.string().min(10, "Valid phone number is required"),
+  address: z.string().min(1, "Address is required"),
   grades: z.string().min(1, "Grade(s) is required"),
 });
 type ContactFormData = z.infer<typeof contactSchema>;
@@ -358,6 +359,17 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
             </div>
           </div>
           <div className="grid sm:grid-cols-2 gap-5">
+            <div className="space-y-1.5">
+              <Label htmlFor="address">Address *</Label>
+              <Input
+                id="address"
+                placeholder="School / Organization Street Address, City, State, Zip"
+                {...register("address")}
+              />
+              {errors.address && (
+                <p className="text-red-400 text-xs">{errors.address.message}</p>
+              )}
+            </div>
             <div className="space-y-1.5">
               <Label htmlFor="grades">Grade(s) *</Label>
               <Input
@@ -877,6 +889,10 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                 <div>
                   <dt className="text-gray-500">Phone</dt>
                   <dd>{contact.phone}</dd>
+                </div>
+                <div>
+                  <dt className="text-gray-500">Address</dt>
+                  <dd>{contact.address}</dd>
                 </div>
                 <div>
                   <dt className="text-gray-500">Grades</dt>

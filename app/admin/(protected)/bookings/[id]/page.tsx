@@ -78,6 +78,7 @@ export default async function BookingDetailPage({
             <Field label="Contact" value={booking.contactName} />
             <Field label="Email" value={<a href={`mailto:${booking.email}`} className="text-gold hover:underline">{booking.email}</a>} />
             <Field label="Phone" value={<a href={`tel:${booking.phone}`} className="text-gold hover:underline">{booking.phone}</a>} />
+            {booking.address && <Field label="Address" value={booking.address} />}
             <Field label="Grades" value={booking.grades} />
           </dl>
         </section>

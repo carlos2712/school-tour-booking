@@ -82,6 +82,12 @@ export default async function ConfirmPage({
               <p className="text-gray-600">Contact</p>
               <p className="text-foreground">{booking.contactName}</p>
             </div>
+            {booking.address && (
+              <div>
+                <p className="text-gray-600">Address</p>
+                <p className="text-foreground">{booking.address}</p>
+              </div>
+            )}
             <div>
               <p className="text-gray-600">Booking ID</p>
               <p className="text-foreground font-mono text-xs">{booking.id}</p>

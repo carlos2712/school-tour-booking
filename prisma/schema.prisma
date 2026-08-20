@@ -76,6 +76,7 @@ model Booking {
   contactName      String
   email            String
   phone            String
+  address          String?
   grades           String
   performanceCount Int                  @default(1)
   paymentOption    PaymentOption

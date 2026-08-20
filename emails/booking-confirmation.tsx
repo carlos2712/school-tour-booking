@@ -20,6 +20,7 @@ interface BookingConfirmationEmailProps {
   paymentAmount?: number;
   fullFeeAmount: number;
   phone?: string;
+  address?: string;
   grades?: string;
   notes?: string;
 }
@@ -34,6 +35,7 @@ export function BookingConfirmationEmail({
   paymentAmount,
   fullFeeAmount,
   phone,
+  address,
   grades,
   notes,
 }: BookingConfirmationEmailProps) {
@@ -141,6 +143,12 @@ export function BookingConfirmationEmail({
                 <tr>
                   <td style={{ color: "#6b7280", padding: "4px 0" }}>Phone:</td>
                   <td style={{ color: "#111827", padding: "4px 0" }}>{phone}</td>
+                </tr>
+              )}
+              {address && (
+                <tr>
+                  <td style={{ color: "#6b7280", padding: "4px 0" }}>Address:</td>
+                  <td style={{ color: "#111827", padding: "4px 0" }}>{address}</td>
                 </tr>
               )}
               {grades && (

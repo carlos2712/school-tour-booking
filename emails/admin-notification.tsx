@@ -15,6 +15,7 @@ interface AdminNotificationEmailProps {
     contactName: string;
     email: string;
     phone: string;
+    address?: string;
     grades: string;
     paymentOption: string;
     paymentAmount?: number;
@@ -51,6 +52,7 @@ export function AdminNotificationEmail({
               ["Contact", booking.contactName],
               ["Email", booking.email],
               ["Phone", booking.phone],
+              ...(booking.address ? [["Address", booking.address]] : []),
               ["Grades", booking.grades],
               ["Payment", paymentLabel],
             ].map(([label, value]) => (

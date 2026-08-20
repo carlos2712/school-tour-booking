@@ -54,6 +54,7 @@ export async function POST(
         paymentAmount: booking.paymentAmount ?? undefined,
         fullFeeAmount: booking.show.fullFeeAmount,
         phone: booking.phone,
+        address: booking.address ?? undefined,
         grades: booking.grades,
         notes: booking.notes ?? undefined,
       }),
