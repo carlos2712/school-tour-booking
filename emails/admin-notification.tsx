@@ -37,6 +37,8 @@ export function AdminNotificationEmail({
       ? `Pay What You Can${booking.paymentAmount ? ` — $${booking.paymentAmount}` : ""}`
       : booking.paymentOption === "HILLSBOROUGH_COUNTY"
       ? `Hillsborough County School${booking.paymentAmount ? ` — $${booking.paymentAmount}` : ""}`
+      : booking.paymentOption === "MANATEE_COUNTY"
+      ? `Manatee County Schools${booking.paymentAmount ? ` — $${booking.paymentAmount}` : ""}`
       : `Independent and Private schools${booking.paymentAmount ? ` — $${booking.paymentAmount}` : ""}`;
 
   return (

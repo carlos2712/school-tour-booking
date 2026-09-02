@@ -37,6 +37,7 @@ interface ShowInfo {
   fullFeeAmount: number;
   enablePinellasCounty: boolean;
   enableHillsboroughCounty: boolean;
+  enableManateeCounty: boolean;
   enableIndependentPrivate: boolean;
   enablePwyw: boolean;
   amStartTime: string;
@@ -82,7 +83,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
   const [performanceCount, setPerformanceCount] = useState<1 | 2>(1);
   const [sameDay, setSameDay] = useState(false);
   const [performances, setPerformances] = useState<Performance[]>([{ selectedDateStr: "", showDateId: "", venueLocation: "", studentCount: "" }]);
-  const [paymentOption, setPaymentOption] = useState<"PINELLAS_COUNTY" | "HILLSBOROUGH_COUNTY" | "INDEPENDENT_PRIVATE" | "PAY_WHAT_YOU_CAN">("PINELLAS_COUNTY");
+  const [paymentOption, setPaymentOption] = useState<"PINELLAS_COUNTY" | "HILLSBOROUGH_COUNTY" | "MANATEE_COUNTY" | "INDEPENDENT_PRIVATE" | "PAY_WHAT_YOU_CAN">("PINELLAS_COUNTY");
   const [paymentAmount, setPaymentAmount] = useState("");
   const [customAnswers, setCustomAnswers] = useState<Record<string, string | string[]>>({});
   const [notes, setNotes] = useState("");
@@ -235,7 +236,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
     let finalPaymentAmount: number | undefined = undefined;
     if (paymentOption === "PAY_WHAT_YOU_CAN") {
       finalPaymentAmount = Number(paymentAmount);
-    } else if (paymentOption === "HILLSBOROUGH_COUNTY" || paymentOption === "INDEPENDENT_PRIVATE") {
+    } else if (paymentOption === "HILLSBOROUGH_COUNTY" || paymentOption === "MANATEE_COUNTY" || paymentOption === "INDEPENDENT_PRIVATE") {
       finalPaymentAmount = doubleBookingTotal;
     }
 
@@ -718,6 +719,37 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                   </div>
                 </label>
               )}
+              {show.enableManateeCounty && (
+                <label className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 cursor-pointer hover:border-gold/50 transition-colors">
+                  <input
+                    type="radio"
+                    name="payment"
+                    value="MANATEE_COUNTY"
+                    checked={paymentOption === "MANATEE_COUNTY"}
+                    onChange={() => setPaymentOption("MANATEE_COUNTY")}
+                    className="mt-1 accent-gold"
+                  />
+                  <div>
+                    {performanceCount === 2 && show.doubleBookingDiscountPercent > 0 ? (
+                      <>
+                        <p className="font-medium text-foreground">
+                          Manatee County Schools (${show.fullFeeAmount + (show.fullFeeAmount - ((show.fullFeeAmount * show.doubleBookingDiscountPercent) / 100))})
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          1st Show: ${show.fullFeeAmount} + 2nd Show: ${show.fullFeeAmount - ((show.fullFeeAmount * show.doubleBookingDiscountPercent) / 100)} ({show.doubleBookingDiscountPercent}% discount applied to 2nd show).
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="font-medium text-foreground">
+                          Manatee County Schools (${show.fullFeeAmount * performanceCount})
+                        </p>
+                        <p className="text-sm text-gray-500">Regular fee.</p>
+                      </>
+                    )}
+                  </div>
+                </label>
+              )}
               {show.enableIndependentPrivate && (
                 <label className="flex items-start gap-3 p-4 rounded-lg border border-gray-200 cursor-pointer hover:border-gold/50 transition-colors">
                   <input
@@ -947,12 +979,14 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
                   Pay What You Can{paymentAmount ? ` — $${paymentAmount}` : ""}
                 </p>
               )}
-              {(paymentOption === "HILLSBOROUGH_COUNTY" || paymentOption === "INDEPENDENT_PRIVATE") && (
+              {(paymentOption === "HILLSBOROUGH_COUNTY" || paymentOption === "MANATEE_COUNTY" || paymentOption === "INDEPENDENT_PRIVATE") && (
                 <div className="text-sm space-y-2">
                   <p className="font-medium text-foreground">
                     {paymentOption === "HILLSBOROUGH_COUNTY"
                       ? "Hillsborough County School"
-                      : "Independent and Private schools"}
+                      : paymentOption === "MANATEE_COUNTY"
+                        ? "Manatee County Schools"
+                        : "Independent and Private schools"}
                   </p>
                   {performanceCount === 2 && show.doubleBookingDiscountPercent > 0 ? (
                     <div className="bg-gray-50 p-3 rounded-md space-y-1 text-xs text-gray-600 border border-gray-200">

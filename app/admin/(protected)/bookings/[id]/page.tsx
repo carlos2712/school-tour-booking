@@ -34,7 +34,9 @@ export default async function BookingDetailPage({
         ? `Pay What You Can${booking.paymentAmount ? ` — $${booking.paymentAmount}` : ""}`
         : booking.paymentOption === "HILLSBOROUGH_COUNTY"
           ? `Hillsborough County School — $${booking.paymentAmount ?? booking.show.fullFeeAmount}`
-          : `IndependenIndependent, Chartert and Private schools — $${booking.paymentAmount ?? booking.show.fullFeeAmount}`;
+          : booking.paymentOption === "MANATEE_COUNTY"
+            ? `Manatee County Schools — $${booking.paymentAmount ?? booking.show.fullFeeAmount}`
+            : `Independent, Charter and Private schools — $${booking.paymentAmount ?? booking.show.fullFeeAmount}`;
 
   const customAnswers = booking.customAnswers as Record<string, unknown>;
 

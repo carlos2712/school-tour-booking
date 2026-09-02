@@ -24,7 +24,7 @@ const bookingSchema = z.object({
   address: z.string().optional(),
   grades: z.string().min(1),
   performanceCount: z.number().min(1).max(2),
-  paymentOption: z.enum(["PINELLAS_COUNTY", "HILLSBOROUGH_COUNTY", "INDEPENDENT_PRIVATE", "PAY_WHAT_YOU_CAN"]),
+  paymentOption: z.enum(["PINELLAS_COUNTY", "HILLSBOROUGH_COUNTY", "MANATEE_COUNTY", "INDEPENDENT_PRIVATE", "PAY_WHAT_YOU_CAN"]),
   paymentAmount: z.number().optional(),
   notes: z.string().optional(),
   customAnswers: z.record(z.string(), z.unknown()).optional(),

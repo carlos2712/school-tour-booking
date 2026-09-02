@@ -16,6 +16,7 @@ model Show {
   fullFeeAmount   Int              @default(550)
   enablePinellasCounty         Boolean          @default(true)
   enableHillsboroughCounty     Boolean          @default(true)
+  enableManateeCounty          Boolean          @default(true)
   enableIndependentPrivate     Boolean          @default(true)
   enablePwyw                   Boolean          @default(true)
   amStartTime     String           @default("08:00")
@@ -92,6 +93,7 @@ model Booking {
 enum PaymentOption {
   PINELLAS_COUNTY
   HILLSBOROUGH_COUNTY
+  MANATEE_COUNTY
   INDEPENDENT_PRIVATE
   PAY_WHAT_YOU_CAN
 }
