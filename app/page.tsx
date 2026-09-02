@@ -99,6 +99,7 @@ export default async function Home() {
                   fullFeeAmount: show.fullFeeAmount,
                   enablePinellasCounty: show.enablePinellasCounty,
                   enableHillsboroughCounty: show.enableHillsboroughCounty,
+                  enableManateeCounty: show.enableManateeCounty,
                   enableIndependentPrivate: show.enableIndependentPrivate,
                   enablePwyw: show.enablePwyw,
                   amStartTime: show.amStartTime,

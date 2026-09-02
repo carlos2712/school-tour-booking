@@ -46,7 +46,9 @@ export function BookingConfirmationEmail({
         ? `Pay What You Can${paymentAmount ? ` — $${paymentAmount}` : ""}`
         : paymentOption === "HILLSBOROUGH_COUNTY"
           ? `Hillsborough County School — $${paymentAmount ?? (fullFeeAmount * performances.length)}`
-          : `Independent, Charter and Private schools — $${paymentAmount ?? (fullFeeAmount * performances.length)}`;
+          : paymentOption === "MANATEE_COUNTY"
+            ? `Manatee County Schools — $${paymentAmount ?? (fullFeeAmount * performances.length)}`
+            : `Independent, Charter and Private schools — $${paymentAmount ?? (fullFeeAmount * performances.length)}`;
 
   // Calculate estimated study guide delivery date (2 weeks prior to first performance date)
   let studyGuideDateNotice = "2 weeks prior to your performance date";

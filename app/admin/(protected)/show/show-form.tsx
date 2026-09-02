@@ -28,6 +28,7 @@ interface Show {
   fullFeeAmount: number;
   enablePinellasCounty: boolean;
   enableHillsboroughCounty: boolean;
+  enableManateeCounty: boolean;
   enableIndependentPrivate: boolean;
   enablePwyw: boolean;
   amStartTime: string;
@@ -53,6 +54,7 @@ export function ShowForm({ show }: Props) {
   const [fullFeeAmount, setFullFeeAmount] = useState(show?.fullFeeAmount ?? 550);
   const [enablePinellasCounty, setEnablePinellasCounty] = useState(show?.enablePinellasCounty ?? true);
   const [enableHillsboroughCounty, setEnableHillsboroughCounty] = useState(show?.enableHillsboroughCounty ?? true);
+  const [enableManateeCounty, setEnableManateeCounty] = useState(show?.enableManateeCounty ?? true);
   const [enableIndependentPrivate, setEnableIndependentPrivate] = useState(show?.enableIndependentPrivate ?? true);
   const [enablePwyw, setEnablePwyw] = useState(show?.enablePwyw ?? true);
   const [amStartTime, setAmStartTime] = useState(show?.amStartTime ?? "08:00");
@@ -111,6 +113,7 @@ export function ShowForm({ show }: Props) {
             fullFeeAmount,
             enablePinellasCounty,
             enableHillsboroughCounty,
+            enableManateeCounty,
             enableIndependentPrivate,
             enablePwyw,
             amStartTime,
@@ -240,6 +243,15 @@ export function ShowForm({ show }: Props) {
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
+              checked={enableManateeCounty}
+              onChange={(e) => setEnableManateeCounty(e.target.checked)}
+              className="accent-gold w-4 h-4"
+            />
+            <span className="text-foreground text-sm">Enable Manatee County Schools (Regular fee) option</span>
+          </label>
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
               checked={enableIndependentPrivate}
               onChange={(e) => setEnableIndependentPrivate(e.target.checked)}
               className="accent-gold w-4 h-4"
@@ -256,7 +268,7 @@ export function ShowForm({ show }: Props) {
             <span className="text-foreground text-sm">Enable Pay What You Can option</span>
           </label>
         </div>
-        {(enableHillsboroughCounty || enableIndependentPrivate) && (
+        {(enableHillsboroughCounty || enableManateeCounty || enableIndependentPrivate) && (
           <div className="space-y-1.5">
             <Label>Full Fee Amount ($)</Label>
             <Input
