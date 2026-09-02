@@ -4,7 +4,6 @@ import { resend, FROM_EMAIL, ADMIN_EMAIL } from "@/lib/resend";
 import { BookingConfirmationEmail } from "@/emails/booking-confirmation";
 import { AdminNotificationEmail } from "@/emails/admin-notification";
 import { z } from "zod";
-import { auth } from "@/lib/auth";
 import { format } from "date-fns";
 
 const performanceSchema = z.object({
@@ -15,7 +14,8 @@ const performanceSchema = z.object({
   customTime: z.string().optional(),
 });
 
-const bookingSchema = z.object({
+const modifyBookingSchema = z.object({
+  bookingId: z.string().min(1),
   showId: z.string().min(1),
   schoolName: z.string().min(1),
   contactName: z.string().min(1),
@@ -31,18 +31,33 @@ const bookingSchema = z.object({
   performances: z.array(performanceSchema).min(1).max(2),
 });
 
-export async function POST(req: NextRequest) {
+export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
-    const data = bookingSchema.parse(body);
+    const data = modifyBookingSchema.parse(body);
 
-    // Verify all show dates belong to the show and are available
+    const oldBooking = await prisma.booking.findUnique({
+      where: { id: data.bookingId },
+      include: { performances: true },
+    });
+
+    if (!oldBooking) {
+      return NextResponse.json({ error: "Booking not found." }, { status: 404 });
+    }
+
+    const oldDateIds = oldBooking.performances.map((p) => p.showDateId);
+    const newDateIds = data.performances.map((p) => p.showDateId);
+
+    // Verify all show dates belong to the show and are available (or already owned by this booking)
     const showDates = await prisma.showDate.findMany({
       where: {
-        id: { in: data.performances.map((p) => p.showDateId) },
+        id: { in: newDateIds },
         showId: data.showId,
         isAvailable: true,
-        isBooked: false,
+        OR: [
+          { isBooked: false },
+          { id: { in: oldDateIds } }
+        ]
       },
     });
 
@@ -70,12 +85,24 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Create booking + mark dates as booked in a transaction
-    const bookingId = await prisma.$transaction(
+    // Modify booking + swap dates in a transaction
+    await prisma.$transaction(
       async (tx) => {
-        const booking = await tx.booking.create({
+        // Free old dates
+        await tx.showDate.updateMany({
+          where: { id: { in: oldDateIds } },
+          data: { isBooked: false },
+        });
+
+        // Delete old performances
+        await tx.bookingPerformance.deleteMany({
+          where: { bookingId: data.bookingId },
+        });
+
+        // Update booking and create new performances
+        await tx.booking.update({
+          where: { id: data.bookingId },
           data: {
-            showId: data.showId,
             schoolName: data.schoolName,
             contactName: data.contactName,
             email: data.email,
@@ -102,12 +129,11 @@ export async function POST(req: NextRequest) {
           },
         });
 
+        // Book new dates
         await tx.showDate.updateMany({
-          where: { id: { in: data.performances.map((p) => p.showDateId) } },
+          where: { id: { in: newDateIds } },
           data: { isBooked: true },
         });
-
-        return booking.id;
       },
       {
         maxWait: 10000,
@@ -117,7 +143,7 @@ export async function POST(req: NextRequest) {
 
     // Fetch full booking after transaction for email
     const booking = await prisma.booking.findUniqueOrThrow({
-      where: { id: bookingId },
+      where: { id: data.bookingId },
       include: {
         show: true,
         performances: { include: { showDate: true } },
@@ -163,7 +189,7 @@ export async function POST(req: NextRequest) {
       resend.emails.send({
         from: FROM_EMAIL,
         to: booking.email,
-        subject: `American Stage School Tour booking Confirmation: ${booking.show.title}`,
+        subject: `Updated: American Stage School Tour booking Confirmation: ${booking.show.title}`,
         react: BookingConfirmationEmail({
           contactName: booking.contactName,
           schoolName: booking.schoolName,
@@ -187,7 +213,7 @@ export async function POST(req: NextRequest) {
         resend.emails.send({
           from: FROM_EMAIL,
           to: adminEmails,
-          subject: `New Booking: ${booking.schoolName} — ${booking.show.title}`,
+          subject: `Modified Booking: ${booking.schoolName} — ${booking.show.title}`,
           react: AdminNotificationEmail({
             booking: {
               id: booking.id,
@@ -220,27 +246,10 @@ export async function POST(req: NextRequest) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: "Invalid booking data" }, { status: 400 });
     }
-    console.error("Booking error:", error);
+    console.error("Modify booking error:", error);
     return NextResponse.json(
-      { error: "Failed to create booking" },
+      { error: "Failed to modify booking" },
       { status: 500 }
     );
   }
-}
-
-export async function GET() {
-  const session = await auth();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const bookings = await prisma.booking.findMany({
-    include: {
-      show: { select: { title: true } },
-      performances: { include: { showDate: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
-
-  return NextResponse.json(bookings);
 }

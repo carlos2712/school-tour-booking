@@ -68,25 +68,39 @@ const contactSchema = z.object({
 });
 type ContactFormData = z.infer<typeof contactSchema>;
 
+export interface InitialBookingData {
+  id: string;
+  contact: ContactFormData;
+  performanceCount: 1 | 2;
+  sameDay: boolean;
+  performances: Performance[];
+  paymentOption: "PINELLAS_COUNTY" | "HILLSBOROUGH_COUNTY" | "MANATEE_COUNTY" | "INDEPENDENT_PRIVATE" | "PAY_WHAT_YOU_CAN";
+  paymentAmount: string;
+  notes: string;
+  customAnswers: Record<string, string | string[]>;
+}
+
 interface Props {
   show: ShowInfo;
   availableDates: ShowDate[];
   customQuestions: CustomQuestion[];
+  isModification?: boolean;
+  initialData?: InitialBookingData;
 }
 
 const STEPS = ["Contact Info", "Performance Details", "Payment & Extras", "Review"];
 
-export function BookingFormWrapper({ show, availableDates, customQuestions }: Props) {
+export function BookingFormWrapper({ show, availableDates, customQuestions, isModification, initialData }: Props) {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [contact, setContact] = useState<ContactFormData | null>(null);
-  const [performanceCount, setPerformanceCount] = useState<1 | 2>(1);
-  const [sameDay, setSameDay] = useState(false);
-  const [performances, setPerformances] = useState<Performance[]>([{ selectedDateStr: "", showDateId: "", venueLocation: "", studentCount: "" }]);
-  const [paymentOption, setPaymentOption] = useState<"PINELLAS_COUNTY" | "HILLSBOROUGH_COUNTY" | "MANATEE_COUNTY" | "INDEPENDENT_PRIVATE" | "PAY_WHAT_YOU_CAN">("PINELLAS_COUNTY");
-  const [paymentAmount, setPaymentAmount] = useState("");
-  const [customAnswers, setCustomAnswers] = useState<Record<string, string | string[]>>({});
-  const [notes, setNotes] = useState("");
+  const [contact, setContact] = useState<ContactFormData | null>(initialData?.contact ?? null);
+  const [performanceCount, setPerformanceCount] = useState<1 | 2>(initialData?.performanceCount ?? 1);
+  const [sameDay, setSameDay] = useState(initialData?.sameDay ?? false);
+  const [performances, setPerformances] = useState<Performance[]>(initialData?.performances ?? [{ selectedDateStr: "", showDateId: "", venueLocation: "", studentCount: "" }]);
+  const [paymentOption, setPaymentOption] = useState<"PINELLAS_COUNTY" | "HILLSBOROUGH_COUNTY" | "MANATEE_COUNTY" | "INDEPENDENT_PRIVATE" | "PAY_WHAT_YOU_CAN">(initialData?.paymentOption ?? "PINELLAS_COUNTY");
+  const [paymentAmount, setPaymentAmount] = useState(initialData?.paymentAmount ?? "");
+  const [customAnswers, setCustomAnswers] = useState<Record<string, string | string[]>>(initialData?.customAnswers ?? {});
+  const [notes, setNotes] = useState(initialData?.notes ?? "");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -95,7 +109,10 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ContactFormData>({ resolver: zodResolver(contactSchema) as any });
+  } = useForm<ContactFormData>({ 
+    resolver: zodResolver(contactSchema) as any,
+    defaultValues: initialData?.contact
+  });
 
   // Dates that have at least one open slot
   const openSlotDates = availableDates
@@ -241,43 +258,49 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
     }
 
     try {
-      const res = await fetch("/api/bookings", {
-        method: "POST",
+      const url = isModification ? "/api/bookings/modify" : "/api/bookings";
+      const method = isModification ? "PUT" : "POST";
+      
+      const payload = {
+        showId: show.id,
+        bookingId: isModification ? initialData?.id : undefined,
+        ...contact,
+        performanceCount,
+        paymentOption,
+        paymentAmount: finalPaymentAmount,
+        notes,
+        customAnswers,
+        performances: sameDay
+          ? [
+            {
+              showDateId: getSlotsForDate(performances[0]!.selectedDateStr).find(s => s.timeSlot === "AM")?.id ?? "",
+              venueLocation: performances[0]!.venueLocation,
+              studentCount: parseInt(performances[0]!.studentCount, 10) || 1,
+              customTime: performances[0]!.customTime,
+            },
+            {
+              showDateId: getSlotsForDate(performances[0]!.selectedDateStr).find(s => s.timeSlot === "PM")?.id ?? "",
+              venueLocation: performances[0]!.venueLocation,
+              studentCount: parseInt(performances[0]!.studentCount, 10) || 1,
+              customTime: performances[0]!.pmCustomTime,
+            }
+          ]
+          : performances.slice(0, performanceCount).map((p) => {
+            const slot = availableDates.find(d => d.id === p!.showDateId);
+            return {
+              showDateId: p!.showDateId,
+              venueLocation: p!.venueLocation,
+              studentCount: parseInt(p!.studentCount, 10) || 1,
+              preferredAlternateDate: p!.preferredAlternateDate,
+              customTime: slot?.timeSlot === "PM" ? p!.pmCustomTime : p!.customTime,
+            };
+          }),
+      };
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          showId: show.id,
-          ...contact,
-          performanceCount,
-          paymentOption,
-          paymentAmount: finalPaymentAmount,
-          notes,
-          customAnswers,
-          performances: sameDay
-            ? [
-              {
-                showDateId: getSlotsForDate(performances[0]!.selectedDateStr).find(s => s.timeSlot === "AM")?.id ?? "",
-                venueLocation: performances[0]!.venueLocation,
-                studentCount: parseInt(performances[0]!.studentCount, 10) || 1,
-                customTime: performances[0]!.customTime,
-              },
-              {
-                showDateId: getSlotsForDate(performances[0]!.selectedDateStr).find(s => s.timeSlot === "PM")?.id ?? "",
-                venueLocation: performances[0]!.venueLocation,
-                studentCount: parseInt(performances[0]!.studentCount, 10) || 1,
-                customTime: performances[0]!.pmCustomTime,
-              }
-            ]
-            : performances.slice(0, performanceCount).map((p) => {
-              const slot = availableDates.find(d => d.id === p!.showDateId);
-              return {
-                showDateId: p!.showDateId,
-                venueLocation: p!.venueLocation,
-                studentCount: parseInt(p!.studentCount, 10) || 1,
-                preferredAlternateDate: p!.preferredAlternateDate,
-                customTime: slot?.timeSlot === "PM" ? p!.pmCustomTime : p!.customTime,
-              };
-            }),
-        }),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -1034,7 +1057,7 @@ export function BookingFormWrapper({ show, availableDates, customQuestions }: Pr
               size="lg"
               className="flex-1"
             >
-              {submitting ? "Submitting…" : "Confirm Booking →"}
+              {submitting ? "Submitting…" : isModification ? "Save Changes →" : "Confirm Booking →"}
             </Button>
           </div>
         </div>

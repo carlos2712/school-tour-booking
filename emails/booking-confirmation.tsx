@@ -23,6 +23,7 @@ interface BookingConfirmationEmailProps {
   address?: string;
   grades?: string;
   notes?: string;
+  modifyUrl?: string;
 }
 
 export function BookingConfirmationEmail({
@@ -38,6 +39,7 @@ export function BookingConfirmationEmail({
   address,
   grades,
   notes,
+  modifyUrl,
 }: BookingConfirmationEmailProps) {
   const paymentLabel =
     paymentOption === "PINELLAS_COUNTY"
@@ -240,10 +242,33 @@ export function BookingConfirmationEmail({
           </div>
         )}
 
-        {/* Booking ID */}
+        {/* Booking ID & Modify Link */}
         <div style={{ borderTop: "1px solid #ede5d4", paddingTop: "20px" }}>
           <p style={{ color: "#6b7280", fontSize: "12px", marginBottom: "4px" }}>BOOKING ID</p>
-          <p style={{ color: "#6b7280", fontFamily: "monospace", fontSize: "12px", margin: 0 }}>{bookingId}</p>
+          <p style={{ color: "#6b7280", fontFamily: "monospace", fontSize: "12px", margin: "0 0 16px 0" }}>{bookingId}</p>
+          
+          {modifyUrl && (
+            <div style={{ textAlign: "center", marginTop: "24px" }}>
+              <a
+                href={modifyUrl}
+                style={{
+                  display: "inline-block",
+                  backgroundColor: "#56398d",
+                  color: "#ffffff",
+                  textDecoration: "none",
+                  fontWeight: "bold",
+                  fontSize: "14px",
+                  padding: "12px 24px",
+                  borderRadius: "6px",
+                }}
+              >
+                Modify Reservation
+              </a>
+              <p style={{ color: "#6b7280", fontSize: "12px", marginTop: "8px", marginBottom: 0 }}>
+                Need to change a date or student count? Use the link above.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
