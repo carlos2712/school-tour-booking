@@ -8,10 +8,12 @@ export const dynamic = "force-dynamic";
 export default async function ModifyBookingPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
+
   const booking = await prisma.booking.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       performances: { include: { showDate: true } },
     },
